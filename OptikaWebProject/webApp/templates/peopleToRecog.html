@@ -8,46 +8,52 @@
       crossorigin="anonymous"
     />
   </head>
-  <body>
-    <a href="{% url 'mainPage' %}" class="btn btn-primary" style="margin-left: 25px" style="margin-bottom: 25px"
-      >Home</a>
-    <div id="peopleContainer"></div>
+  <body class="bg-dark text-white">
+    <a
+      href="/"
+      class="btn btn-primary"
+      style="margin-left: 25px; margin-bottom: 25px"
+      >Home</a
+    >
+    <ul id="people-container" style="list-style-type: none"></ul>
     <button
       class="btn btn-primary"
-      id="loadMorePeople"
+      id="load-more-people"
       style="margin-left: 25px"
     >
       Cargar mas personas
     </button>
     <a
-      href="{% url 'addPerson' %}"
+      href="/peopleToRecog/addPerson"
       class="btn btn-primary"
       style="margin-left: 25px"
       >Añadir persona</a
     >
+    <!-- Modal dialog START -->
     <div
-      class="modal fade"
-      id="modalDelete"
+      class="modal fade text-dark"
+      id="modal-delete"
       tabindex="-1"
       role="dialog"
-      aria-labelledby="exampleModalLabel"
       aria-hidden="true"
     >
       <div class="modal-dialog" role="document">
         <div class="modal-content">
           <div class="modal-header">
-            <h5 class="modal-title" id="exampleModalLabel">Eliminar Usuario</h5>
+            <h5 class="modal-title text-dark">Eliminar Usuario</h5>
             <button
               type="button"
               class="close"
               data-bs-dismiss="modal"
               aria-label="Close"
             >
-              <span aria-hidden="true">&times;</span>
+              <span aria-hidden="true" class="text-dark">&times;</span>
             </button>
           </div>
-          <div class="modal-body" id="modalBody"></div>
-          <div class="modal-footer" id="modalFooter">
+
+          <div class="modal-body" id="modal-body"></div>
+
+          <div class="modal-footer" id="modal-footer">
             <button
               type="button"
               class="btn btn-danger"
@@ -58,7 +64,7 @@
             <button
               type="button"
               class="btn btn-success"
-              id="confirmDeleteButton"
+              id="confirm-delete-btn"
             >
               Confirmar
             </button>
@@ -66,6 +72,8 @@
         </div>
       </div>
     </div>
+    <!-- Modal dialog END -->
+
     <script
       src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.1/dist/js/bootstrap.bundle.min.js"
       integrity="sha384-u1OknCvxWvY5kfmNBILK2hRnQC3Pr17a+RTT6rIHI7NnikvbZlHgTPOOmMi466C8"
@@ -84,6 +92,9 @@
       getDocs,
       startAfter,
       deleteDoc,
+      updateDoc,
+      arrayUnion,
+      arrayRemove,
       doc,
     } from "https://www.gstatic.com/firebasejs/9.9.4/firebase-firestore.js";
     import {
@@ -91,6 +102,8 @@
       ref,
       listAll,
       deleteObject,
+      uploadBytesResumable,
+      getDownloadURL,
     } from "https://www.gstatic.com/firebasejs/9.9.4/firebase-storage.js";
 
     const firebaseConfig = {
@@ -122,7 +135,7 @@
       (await getDocs(q)).forEach((doc) => knownPeople.push(doc));
 
       document
-        .getElementById("loadMorePeople")
+        .getElementById("load-more-people")
         .addEventListener("click", async () => {
           (await getKnownPeople(knownPeople[knownPeople.length - 1])).forEach(
             loadNewPerson
@@ -133,22 +146,29 @@
     }
 
     function loadNewPerson(person) {
-      let container = document.getElementById("peopleContainer");
+      let container = document.getElementById("people-container");
       let newPerson = document.createElement("div");
 
       container.appendChild(newPerson);
 
       let personCount = container.getElementsByTagName("div").length;
       let images = "";
+      let imageCount = 0;
 
       for (let image of person.data().images) {
+        imageCount++;
         images += `
-              <img
-                src="${image}"
-                alt="Image"
-                class="img-thumbnail"
-                style="width: 250px; box-shadow: 0px 4px 5px black; margin: 10px;"
-              />
+			  <li style="text-decoration: none;">
+               <div style="position: relative;">
+                 <img
+                   src="${image}"
+                   alt="Image"
+                   class="img-thumbnail"
+                   style="width: 250px; box-shadow: 0px 4px 5px black; margin: 10px;"
+                 />
+				 <button id="delete-image-${person.id}-${image}" type="button" style="position: absolute; top: 0px; right: 0px; font-weight: bold; transform: translate(-20px, 20px)" class="btn btn-danger" onclick="">x</button>
+               </div>
+            </li>
         `;
       }
 
@@ -162,10 +182,53 @@
               style="padding: 10px; box-shadow: 0px 4px 5px black; cursor: pointer; display: flex; justify-content: space-between;"
             >
               ${person.data().name}
-              <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#modalDelete">Eliminar</button>
+              <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#modal-delete">Eliminar</button>
             </h3>
-            <div class="picturesContainer" style="display: none; flex-wrap: wrap;">
-              ${images}
+            <div class="picturesContainer" style="display: none; flex-direction: column;">
+			  <div style="display: flex; flex-wrap: wrap;">
+				${images}
+				${
+          imageCount < 10
+            ? `<li style="text-decoration: none;">
+              <div
+                class="img-thumbnail"
+                style="width: 250px; height: 80%; box-shadow: 0px 4px 5px black; margin: 10px; padding: 20px 20px 20px 20px; display: flex; justify-content: center; flex-direction: column"
+              >
+                <label
+                  for="picture"
+                  class="text-dark"
+                  style="font-weight: bold; font-size: 20px;"
+                >
+                  Imagen:
+                </label>
+                <input
+                  id="image-input${person.id}"
+                  type="file"
+                  class="form-control pictureInput"
+                  name="picture"
+                />
+              </div>
+              <div
+                id="uploadStatus${person.id}"
+                class="text-white"
+                style="margin: 0px 0px 0px 20px;"
+              ></div>
+            </li>`
+            : ""
+        }
+				
+			  </div>
+			  ${
+          imageCount < 10
+            ? `<div>
+				    <p style="font-size: 18px;">
+					  Puedes agregar hasta <span style="font-weight: bold;">${
+              10 - imageCount
+            }</span> imagenes mas.
+				    </p>
+				  </div>`
+            : ""
+        } 
             </div>
           </div>`;
 
@@ -178,21 +241,19 @@
         .getElementsByTagName("button")[0]
         .addEventListener("click", () => {
           document.getElementById(
-            "modalBody"
+            "modal-body"
           ).innerText = `¿Esta seguro de eliminar a ${
             person.data().name
           } permanentemente?`;
 
-          let footer = document.getElementById("modalFooter");
+          let footer = document.getElementById("modal-footer");
 
-          let confirmDeleteButton = document.getElementById(
-            "confirmDeleteButton"
-          );
+          let confirmDeleteBtn = document.getElementById("confirm-delete-btn");
 
-          confirmDeleteButton.dataset.uid = person.id;
+          confirmDeleteBtn.dataset.uid = person.id;
 
-          confirmDeleteButton.addEventListener("click", async () => {
-            if (confirmDeleteButton.dataset.uid !== person.id) return;
+          confirmDeleteBtn.addEventListener("click", async () => {
+            if (confirmDeleteBtn.dataset.uid !== person.id) return;
             await deleteDoc(doc(db, `KnownPeople/${person.id}`));
 
             let files = await listAll(
@@ -205,6 +266,29 @@
           });
         });
 
+      for (let image of person.data().images) {
+        let deleteImgBtn = document.getElementById(
+          `delete-image-${person.id}-${image}`
+        );
+
+        deleteImgBtn.addEventListener("click", async () => {
+          await updateDoc(doc(db, `KnownPeople/${person.id}`), {
+            images: arrayRemove(image),
+          });
+          let files = await listAll(
+            ref(getStorage(), `KnownPeople/${person.id}`)
+          );
+          files.items.forEach(async (itemRef) => {
+            await getDownloadURL(itemRef).then(async (url) => {
+              if (url === image) {
+                await deleteObject(itemRef);
+                location.reload();
+              }
+            });
+          });
+        });
+      }
+
       userInfo.addEventListener("click", (e) => {
         let picturesContainer = newPersonNewHtml.getElementsByTagName("div")[0];
 
@@ -216,10 +300,57 @@
             ? currentCss.replace(currentDisplayStyle, "none")
             : currentCss.replace(currentDisplayStyle, "flex");
       });
+
+      let input = document.getElementById("image-input" + person.id);
+
+      input.addEventListener("change", (e) => {
+        submitImage(e, person.id);
+      });
     }
 
     async function init() {
       (await getKnownPeople()).forEach(loadNewPerson);
+    }
+
+    async function submitImage(e, uid) {
+      e.preventDefault();
+      let image = e.target.files[0];
+      let url = await uploadImagePromise(uid, image);
+
+      updateDoc(doc(db, `KnownPeople/${uid}`), {
+        images: arrayUnion(url),
+      }).then(() => {
+        location.reload();
+      });
+    }
+
+    function uploadImagePromise(uid, image) {
+      return new Promise((res, rej) => {
+        let storage = getStorage();
+        let storageRef = ref(storage, `KnownPeople/${uid}/${image.name}`);
+
+        let task = uploadBytesResumable(storageRef, image);
+
+        task.on(
+          "state-changed",
+          (snapshot) => {
+            let percent = Math.round(
+              (snapshot.bytesTransferred / snapshot.totalBytes) * 100
+            );
+            document.getElementById(
+              "uploadStatus" + uid
+            ).innerText = `${percent}%`;
+          },
+          (err) => {
+            rej(err);
+          },
+          () => {
+            getDownloadURL(task.snapshot.ref).then((url) => {
+              res(url);
+            });
+          }
+        );
+      });
     }
 
     init();
