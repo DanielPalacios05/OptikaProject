@@ -11,7 +11,7 @@ https://docs.djangoproject.com/en/4.1/ref/settings/
 """
 
 from pathlib import Path
-
+import os
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -121,7 +121,20 @@ STATIC_URL = 'static/'
 
 STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
-STATIC_ROOT = BASE_DIR / 'staticfiles'
+STATIC_ROOT = BASE_DIR / 'staticfiles' #para el correo yo tenia una definicion diferente de esto. Puede que no funcione por eso
+
+#----------Configuracion para el correo-----------#
+# STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+STATICFILES_DIRS = (os.path.join(BASE_DIR, 'static'), )
+
+EMAIL_HOST = 'smtp.googlemail.com'
+EMAIL_PORT = 587
+EMAIL_HOST_USER = 'optikaeafit@gmail.com' 
+# EMAIL_HOST_PASSWORD = 'pokloskaya'
+EMAIL_HOST_PASSWORD = 'vwmbzatexlspbced'
+EMAIL_USE_TLS = True
+#-----------------------------------------------------#
+
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.1/ref/settings/#default-auto-field

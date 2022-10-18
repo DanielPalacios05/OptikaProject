@@ -1,7 +1,5 @@
-{% extends "home.html" %}
-
-{% block content %}
-
+<!-- Con esto se puede testear lo de los correos -->
+<html>
 
     <h2> ESTAS EN LA ABOUT PAGE 0: </h2>
     <h2> ESTAS EN LA ABOUT PAGE 0: </h2>
@@ -10,5 +8,14 @@
         <input type="file" name="image_upload">
     </div>
 
+    <body>
+        <form action="#" method="POST">
+            {% csrf_token %}
+            <input type="text" name="mail">
+            <input style="font-size: 26px;" type="submit" value="Enviar">
+        </form>
+    </body>
 
-{% endblock %}
+
+
+</html>
