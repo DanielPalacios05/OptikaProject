@@ -4,10 +4,11 @@ from azure.iot.device import IoTHubDeviceClient
 from azure.core.exceptions import AzureError
 from azure.storage.blob import BlobClient
 import cv2
+import datetime
 
 FILE_NAME = "frame.jpg"
 CONNECTION_STRING = "HostName=optika2.azure-devices.net;DeviceId=testdevice;SharedAccessKey=e3LZRp2CrOK+eolM5camvHU+hwEneZ5mlV71DOkJerw="
-
+stor = "DefaultEndpointsProtocol=https;AccountName=optikaimages;AccountKey=nrYz2nK08cwrcAD3m+7OCxk0ZGLALyVJHECVkdGJlpIpvkaQxIw3E/4iO3CxO01plBfdHcv1Mofq+AStcq9kMg==;EndpointSuffix=core.windows.net"
 
 def create_client():
     # Instantiate client
@@ -28,6 +29,8 @@ def create_client():
     return client
 
 def store_blob(blob_info, file_name,blob):
+
+
     try:
         sas_url = "https://{}/{}/{}{}".format(
             blob_info["hostName"],
@@ -73,20 +76,27 @@ device_client.connect()
 
 #send camera data to azure whenever q is pressed
 
-video_capture = cv2.VideoCapture(0)
+
+
 
 while True:
 
 
+
     readyTosend = device_client.get_twin()["desired"]["readyToSend"]
+
+    storage_info = device_client.get_storage_info_for_blob(FILE_NAME)
     
 
     if readyTosend:
 
+        video_capture = cv2.VideoCapture(0)
+
         ret, frame = video_capture.read()
 
-        storage_info = device_client.get_storage_info_for_blob(FILE_NAME)
+        video_capture.release()
 
+        
 
         blobImage = cv2.imencode(".jpg",frame)[1].tobytes()
 
@@ -112,5 +122,6 @@ while True:
             device_client.notify_blob_upload_status(
                 storage_info["correlationId"], False, result.status_code, str(result)
             )
+    time.sleep(25)
 
 

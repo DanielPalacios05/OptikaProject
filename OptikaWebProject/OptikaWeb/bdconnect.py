@@ -28,7 +28,7 @@ class FirebaseManager:
 
     def sendDetectionLog(self,image,name,date,known,db=db):
 
-        my_datetime=date.astimezone(pytz.timezone('Etc/GMT-5'))
+        my_datetime=date.astimezone(pytz.timezone('America/Bogota'))
 
         my_datetime_str =  my_datetime.strftime('%Y-%m-%d-%H:%M:%S-')
 

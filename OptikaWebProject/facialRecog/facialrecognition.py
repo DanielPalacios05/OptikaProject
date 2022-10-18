@@ -13,7 +13,7 @@ class FacialRecog:
 
     def __init__(self) -> None:
         
-        self.knownPeople = { } #{name: embedding}
+        self.knownPeople = {} #{name: embedding}
 
         self.deviceIsOn = True
 
