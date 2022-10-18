@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<!-- MINUTO 40-->
+<html>
+  <head>
+    <!-- <meta name="viewport" content="with=device-width,initial-scale=1.0"> -->
+    <!--^^hacer que la pagina sea responsive-->
+    <title>Optika a</title>
+    <!-- <link rel="stylesheet" href="style.css"> -->
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'styleDetections.css'%}" />
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.1/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+      integrity="sha384-iYQeCzEYFbKjA/T2uDLTpkwGzCiq6soy8tYaI1GyVh/UjpbCx/TYkiZhlZB6+fzT"
+      crossorigin="anonymous"
+    />
+    <!--^^conectar el css con el HTMl-->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@700&display=swap"
+      rel="stylesheet"
+    />
+    <!--^^este es el fond, el estilo de letra-->
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.1.2/css/fontawesome.min.css"
+    />
+    <!--^^este es un boton-->
+  </head>
+  <body>
+    <section class="header">
+          {% if detections %}
+          <div  class="d-flex flex-row" style="flex-wrap: wrap;">
+            {% for detection in detections %}
+            <div  class="bg-dark"style="display: flex; margin: 10px; 
+												 width: 22rem; 
+												 flex-direction: column;
+												 padding: 10px;
+												 box-shadow: 0px 4px 5px black;
+												 cursor: pointer;
+												 justify-content: space-between;"
+						>
+							
+              <div
+								id={{ detection.id }}
+                class="detection"
+                style="display: flex; margin: 5px; 
+											cursor: pointer;
+											justify-content: space-between;
+										"
+                >
+                <p class="detectionInfo text-secondary" >
+									{% if detection.known %}
+										Se ha detectado a {{ detection.name }} en {{ detection.datetime }}
+									{% else %}
+										Se ha detectado a una persona desconocida en {{ detection.datetime }}
+									{% endif %}
+                </p>
+								</div>
+								<img
+									class="img-thumbnail"
+                  src={{ detection.img_url }}
+                  alt="Image"
+							/>
+            </div>
+						{% endfor %}
+          </dv>
+          {% else %}
+          <p>No polls are available.</p>
+          {% endif %}
+        </div>
+				<div style="padding: 10px;
+									 margin: 7px;">
+					<a href="{% url 'mainPage' %}" class="btn btn-danger"> Regresar</a>
+				</div>
+      </div>
+    </section>
+  </body>
+</html>
+

@@ -1,0 +1,227 @@
+<html>
+  <head>
+    <title>PeopleToRecog</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.1/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+      integrity="sha384-iYQeCzEYFbKjA/T2uDLTpkwGzCiq6soy8tYaI1GyVh/UjpbCx/TYkiZhlZB6+fzT"
+      crossorigin="anonymous"
+    />
+  </head>
+  <body>
+    <a href="{% url 'mainPage' %}" class="btn btn-primary" style="margin-left: 25px" style="margin-bottom: 25px"
+      >Home</a>
+    <div id="peopleContainer"></div>
+    <button
+      class="btn btn-primary"
+      id="loadMorePeople"
+      style="margin-left: 25px"
+    >
+      Cargar mas personas
+    </button>
+    <a
+      href="{% url 'addPerson' %}"
+      class="btn btn-primary"
+      style="margin-left: 25px"
+      >Añadir persona</a
+    >
+    <div
+      class="modal fade"
+      id="modalDelete"
+      tabindex="-1"
+      role="dialog"
+      aria-labelledby="exampleModalLabel"
+      aria-hidden="true"
+    >
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="exampleModalLabel">Eliminar Usuario</h5>
+            <button
+              type="button"
+              class="close"
+              data-bs-dismiss="modal"
+              aria-label="Close"
+            >
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body" id="modalBody"></div>
+          <div class="modal-footer" id="modalFooter">
+            <button
+              type="button"
+              class="btn btn-danger"
+              data-bs-dismiss="modal"
+            >
+              Cancelar
+            </button>
+            <button
+              type="button"
+              class="btn btn-success"
+              id="confirmDeleteButton"
+            >
+              Confirmar
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <script
+      src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.1/dist/js/bootstrap.bundle.min.js"
+      integrity="sha384-u1OknCvxWvY5kfmNBILK2hRnQC3Pr17a+RTT6rIHI7NnikvbZlHgTPOOmMi466C8"
+      crossorigin="anonymous"
+    ></script>
+  </body>
+  <script type="module">
+    // Import the functions you need from the SDKs you need
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.9.4/firebase-app.js";
+    import {
+      getFirestore,
+      query,
+      limit,
+      orderBy,
+      collection,
+      getDocs,
+      startAfter,
+      deleteDoc,
+      doc,
+    } from "https://www.gstatic.com/firebasejs/9.9.4/firebase-firestore.js";
+    import {
+      getStorage,
+      ref,
+      listAll,
+      deleteObject,
+    } from "https://www.gstatic.com/firebasejs/9.9.4/firebase-storage.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyBBCioy9g_Vd5o8l8NCQ3iPXu6tVGfil0c",
+      authDomain: "optika-6e7bd.firebaseapp.com",
+      databaseURL: "https://optika-6e7bd-default-rtdb.firebaseio.com",
+      projectId: "optika-6e7bd",
+      storageBucket: "optika-6e7bd.appspot.com",
+      messagingSenderId: "101731463535",
+      appId: "1:101731463535:web:6305f94fa27c289e8e389a",
+      measurementId: "G-1LJ84D06HZ",
+    };
+
+    // Initialize Firebase
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    async function getKnownPeople(doc = undefined) {
+      let q = query(collection(db, "KnownPeople"), orderBy("name"), limit(10));
+      let knownPeople = [];
+
+      if (doc)
+        q = query(
+          collection(db, "KnownPeople"),
+          orderBy("name"),
+          limit(10),
+          startAfter(doc)
+        );
+      (await getDocs(q)).forEach((doc) => knownPeople.push(doc));
+
+      document
+        .getElementById("loadMorePeople")
+        .addEventListener("click", async () => {
+          (await getKnownPeople(knownPeople[knownPeople.length - 1])).forEach(
+            loadNewPerson
+          );
+        });
+
+      return knownPeople;
+    }
+
+    function loadNewPerson(person) {
+      let container = document.getElementById("peopleContainer");
+      let newPerson = document.createElement("div");
+
+      container.appendChild(newPerson);
+
+      let personCount = container.getElementsByTagName("div").length;
+      let images = "";
+
+      for (let image of person.data().images) {
+        images += `
+              <img
+                src="${image}"
+                alt="Image"
+                class="img-thumbnail"
+                style="width: 250px; box-shadow: 0px 4px 5px black; margin: 10px;"
+              />
+        `;
+      }
+
+      newPerson.outerHTML = `<div
+            id="personNumber${personCount}"
+            class="person"
+            style="display: flex; margin: 10px; flex-direction: column;"
+          >
+            <h3
+              class="userInfo"
+              style="padding: 10px; box-shadow: 0px 4px 5px black; cursor: pointer; display: flex; justify-content: space-between;"
+            >
+              ${person.data().name}
+              <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#modalDelete">Eliminar</button>
+            </h3>
+            <div class="picturesContainer" style="display: none; flex-wrap: wrap;">
+              ${images}
+            </div>
+          </div>`;
+
+      let newPersonNewHtml = document.getElementById(
+        `personNumber${personCount}`
+      );
+
+      let userInfo = newPersonNewHtml.getElementsByTagName("h3")[0];
+      userInfo
+        .getElementsByTagName("button")[0]
+        .addEventListener("click", () => {
+          document.getElementById(
+            "modalBody"
+          ).innerText = `¿Esta seguro de eliminar a ${
+            person.data().name
+          } permanentemente?`;
+
+          let footer = document.getElementById("modalFooter");
+
+          let confirmDeleteButton = document.getElementById(
+            "confirmDeleteButton"
+          );
+
+          confirmDeleteButton.dataset.uid = person.id;
+
+          confirmDeleteButton.addEventListener("click", async () => {
+            if (confirmDeleteButton.dataset.uid !== person.id) return;
+            await deleteDoc(doc(db, `KnownPeople/${person.id}`));
+
+            let files = await listAll(
+              ref(getStorage(), `KnownPeople/${person.id}`)
+            );
+            files.items.forEach(async (itemRef) => {
+              await deleteObject(itemRef);
+              location.reload();
+            });
+          });
+        });
+
+      userInfo.addEventListener("click", (e) => {
+        let picturesContainer = newPersonNewHtml.getElementsByTagName("div")[0];
+
+        let currentCss = picturesContainer.style.cssText;
+        let currentDisplayStyle = currentCss.match(/none|flex/)[0];
+
+        picturesContainer.style.cssText =
+          currentDisplayStyle === "flex"
+            ? currentCss.replace(currentDisplayStyle, "none")
+            : currentCss.replace(currentDisplayStyle, "flex");
+      });
+    }
+
+    async function init() {
+      (await getKnownPeople()).forEach(loadNewPerson);
+    }
+
+    init();
+  </script>
+</html>

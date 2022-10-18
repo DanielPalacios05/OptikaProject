@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<!-- MINUTO 40-->
+<html>
+<head>
+    <!-- <meta name="viewport" content="with=device-width,initial-scale=1.0"> -->
+    <!--^^hacer que la pagina sea responsive--> 
+    <title>Optika a </title>
+    <!-- <link rel="stylesheet" href="style.css"> -->
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'style.css'%}"> 
+    <!--^^conectar el css con el HTMl-->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@700&display=swap" rel="stylesheet">
+    <!--^^este es el fond, el estilo de letra-->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.1.2/css/fontawesome.min.css">
+    <!--^^este es un boton-->
+
+</head>
+<body>
+    <section class="header">
+    <!--^^para que apareca el background-->
+ 
+
+    <div class="text-box">
+        
+        <h1>Camara en vivo en desarrollo</h1>
+
+        <a href="{% url 'mainPage' %}" class="hero-btn"> Regresar</a>
+
+    </div>
+
+    </section>
