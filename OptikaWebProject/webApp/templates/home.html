@@ -2,12 +2,12 @@
 <!-- MINUTO 40-->
 <html>
 <head>
-    <!-- <meta name="viewport" content="with=device-width,initial-scale=1.0"> -->
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
     <!--^^hacer que la pagina sea responsive--> 
     <title>Optika a </title>
     <!-- <link rel="stylesheet" href="style.css"> -->
     {% load static %}
-    <link rel="stylesheet" href="{% static 'style.css' %}"> 
+    <link rel="stylesheet" href="{% static 'style.css'%}"> 
     <!--^^conectar el css con el HTMl-->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -27,7 +27,7 @@
                 <!-- ^^Le aniadimos un boton para que se peuda cerrar en los disposititvos mobiles -->
                 <ul>
                     <li> <a href="">HOME</a> </li>
-                    <li> <a href="">ABOUT</a> </li>
+                    <li> <a href="/about">ABOUT</a> </li>
                     <li> <a href="">IA</a> </li>
                     <li> <a href="">INGRESA</a> </li>
                     <!-- <li> <a href="">REGISTRATE</a> </li> -->
@@ -47,7 +47,7 @@
             
         </p>
         <!-- <a href="">Registrate</a>-->
-        <a href="{% url 'mainPage' %}" class="hero-btn"> Registrate</a>
+        <a href="/mainPage" class="hero-btn"> Registrate</a>
         <!-- PARA HACER QUE ESO SE VEA COMO UN BOTON, lo creamos en una clase y con CSS lo hacemos el boton -->
     </div>
 
@@ -55,33 +55,34 @@
 
     <!--texto inferior pagina principal-->
     <section class="curso">
-        <h1>Cosas que ofrecemos:</h1>
-        <p> ofrecemos seguridad en el hogar </p>
+        <h1>Seguridad automatizada</h1>
+        <p> Tranquilidad innigualable al disponer de optika </p>
 
         <div class="row">
             <div class="course-col">
                 <h3>¿Qué es Optika?</h3>
                 <p>
-                    Lorem ipsum dolor sit amet consectetur adipisicing elit. Enim officiis voluptate necessitatibus doloribus porro et voluptatum earum expedita incidunt temporibus sed accusantium exercitationem similique rerum quisquam placeat harum, consequuntur ex?
+                    Optika es un innovador sistema de vigilancia con inteligencia artificial. Gracias a este dispositivo no tendras que preocuparte por quien estuvo al frente de tu puerta.
                 </p>
             </div>
             <div class="course-col">
                 <h3>¿Por qué elegir Optika?</h3>
                 <p>
-                    Lorem ipsum dolor sit amet consectetur adipisicing elit. Minus deleniti, at tempore fugit voluptates accusamus, itaque deserunt dolores quas ea rerum blanditiis libero quod excepturi, sapiente beatae nostrum iure numquam.
+                    A diferencia de los sistemas de seguridad tradicionales, con Optika puedes saber si la persona frente a tu puerta es conocida o desconocida, y además comunicarte con ella. 
                 </p>
             </div>
             <div class="course-col">
                 <h3>¿Qué funciones me ofrece Optika?</h3>
                 <p>
-                    Lorem, ipsum dolor sit amet consectetur adipisicing elit. Eveniet reiciendis id iure iusto, debitis numquam nulla nam eum atque alias minus quisquam facilis odit quos possimus, explicabo nihil omnis fuga?
+                    -Comunicación en tiempo real entre tú y la persona frente el dispositivo-<br> 
+                    -Historial de detecciones-<br> 
+                    -Recibir alertas cuando sean detectadas personas desconocidas-<br> 
+                    -Video en vivo-
                 </p>
             </div>
         </div>
 
     </section>
-
-
 
 
     <!-- JavaScript para mostrar el Menu -->
@@ -99,3 +100,33 @@
 
 </body>
 </html>
+
+<section class="cta">
+
+    <h1>ㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤ<br> ㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤ </h1>
+
+
+</section>
+
+<!-- <section class="cta">
+
+    <h1>No hay nada de que preocuparse<br> mientras cuentes con tu Optika ;) </h1>
+
+    <a href="/mainPage"> registrate ahora </a> 
+
+    <p> Seguridad inteligente</p>
+
+</section> -->
+
+<!-- Footer -->
+
+<section class="footer">
+    <h4>Sobre nosotros</h4>
+    <p>Somos un equipo de estudiantes de cuarto semestre de ingenieria en sistemas de la universidad EAFIT. 
+       <br>conoce más de nuestro proyecto aquí
+    </p>
+    <!-- <div class="icons">
+        <i class="fa fa-star"></i> 
+    </div> -->
+    <!-- esto deberia ser un icono bonito, pero los iconos no funcionan! -->
+</section>
