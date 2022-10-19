@@ -40,13 +40,7 @@ def generateDetectionLog(request):
 
     binary = blob.download_blob().readall()
 
-    frame = cv2.imdecode(np.asarray(bytearray(binary), dtype="uint8"), cv2.IMREAD_COLOR)
-
-    detection = facialRecognizer.detect(frame)
-
-    if detection:
-
-        database.sendDetectionLog(detection['0'],",".join(detection),modified,"known")
+    database.sendDetectionLog(binary,"test",modified,"known")
 
 
     twin = iothub_registry_manager.get_twin(DEVICE_ID)

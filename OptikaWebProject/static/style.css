@@ -189,7 +189,7 @@ h3{
     margin: 100px auto;
     margin-bottom: 40px;
     width: 80%;
-    background-image: linear-gradient(rgb(255 255 255 / 70%), rgb(255 255 255 / 70%)), url(images./logoOptika.png);
+    background-image: linear-gradient(rgb(255 255 255 / 70%), rgb(255 255 255 / 70%)), url(images/logoOptika.png);
     background-position: center;
     background-size: cover;
     border-radius: 10px;

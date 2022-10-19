@@ -84,7 +84,7 @@ class FirebaseManager:
 
         return detections
 
-    def getPeople(self,db=db):
+    def getPeople(self, db=db):
 
         people = []
 
@@ -92,16 +92,12 @@ class FirebaseManager:
 
         for person in knownPeople:
 
-            p = person.to_dict()
+            person_dict = person.to_dict()
 
-            for i in range(len(p["images"])):
+            if "images" in person_dict:
 
-                response = Image.open(requests.get(p["images"][i], stream = True).raw)
+                people.append(person_dict)
 
-                p["images"][i] = response
-
-            people.append(p)
-        
         return people
 
 
