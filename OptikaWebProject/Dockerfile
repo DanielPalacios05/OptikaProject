@@ -24,9 +24,6 @@ RUN apt-get update \
   && echo "$SSH_PASSWD" | chpasswd
 
 RUN sed -i -e's/^from keras.engine.topology import get_source_inputs/from keras.utils.layer_utils import get_source_inputs/' /usr/local/lib/python3.10/site-packages/keras_vggface/models.py
-ENV APP_CONN "DefaultEndpointsProtocol=https;AccountName=optikaimages;AccountKey=nrYz2nK08cwrcAD3m+7OCxk0ZGLALyVJHECVkdGJlpIpvkaQxIw3E/4iO3CxO01plBfdHcv1Mofq+AStcq9kMg==;EndpointSuffix=core.windows.net"
-ENV DEVICE_CONN "HostName=Optika.azure-devices.net;SharedAccessKeyName=iothubowner;SharedAccessKey=xTjzv3NGMOmWJpNdeumidky+Jk2bCNaU+poEGHnA0rs="
-
 
 
 EXPOSE 8000 2222

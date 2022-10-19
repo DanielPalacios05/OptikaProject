@@ -1,102 +1,103 @@
 import os
+
+import requests
 from scipy.spatial.distance import cosine
 from keras_vggface import VGGFace
 from keras_vggface.utils import preprocess_input
 import cv2
-import PIL
-import torchvision.transforms as transform
+from PIL import Image
 from facenet_pytorch import MTCNN, extract_face
 import torch
 import numpy as np
 
+
 class FacialRecog:
 
-    def __init__(self) -> None:
-        
-        self.knownPeople = {} #{name: embedding}
+    def __init__(self):
 
-        self.deviceIsOn = True
+        self.knownPeople = {}  # {name: [embeddings]}
 
-        self.torchdevice= torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-        self.cascade = MTCNN(image_size = 224,margin=40,device=self.torchdevice,post_process=False)
-        self.model = VGGFace(model='resnet50', include_top=False, input_shape=(224, 224, 3), pooling='avg')
-    
-    def jpgFromBlob(self,blob):
+        torchdevice = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
-        #cv2.imencode(".jpg",frame)[1].tobytes()
+        self.cascade = MTCNN(image_size=240, margin=40, device=torchdevice, post_process=False)
+        self.model = VGGFace(model='resnet50', include_top=False, input_shape=(240, 240, 3), pooling='avg')
+
+    def jpgFromBlob(self, blob):
+
+        # cv2.imencode(".jpg",frame)[1].tobytes()
         frame = cv2.imdecode(blob)
 
         return frame
 
+    def detect(self, frame):
 
-    def detectPerson(self,image):
+        # 0 is used for grayscale image
 
+        boxes, probs = self.cascade.detect(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB))
 
-            frame = self.jpgFromBlob(image)
+        detectedPeople = []
 
+        if boxes is not None:
+            filterProbs = probs > 0.90
 
-            boxes,probs = self.cascade.detect(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB))
+            boxes = boxes[filterProbs]
 
-            detectedPeople = []
+            for (x, y, w, h) in boxes:
+                face = extract_face(frame, (x, y, w, h), image_size=240).permute(1, 2, 0).int().numpy()
 
+                name = self.classifyFace(face)
 
+                if name == "Desconocido":
 
-            if boxes is not None:
+                    color = (0, 0, 255)
+                else:
+                    color = (255, 0, 0)
 
-                filterProbs = probs > 0.90
+                detectedPeople.append(name)
 
-                boxes = boxes[filterProbs]
+                cv2.putText(frame, name, (round(x), round(y - 10)), cv2.FONT_HERSHEY_COMPLEX_SMALL, color=color, thickness=1,
+                            fontScale=1)
+                cv2.rectangle(frame, (round(x), round(y)), (round(w), round(h)),
+                              color,
+                              3)
 
+            return frame, detectedPeople
 
-            
-                for (x, y, w, h) in boxes:
+        return None
 
-                    face = extract_face(frame,(x,y,w,h),image_size=240).permute(1, 2, 0).int().numpy()
+    def getEmbedding(self, frame=None, imagePath=None, extractFace=False):
 
+        nimg = np.asarray(frame,dtype=np.uint8)
 
-                    name = self.classifyFace(face)
+        img = cv2.cvtColor(nimg, cv2.COLOR_RGB2BGR)
 
-                    if name == "Desconocido":
-
-                        color = (0,0,255)
-                    else:
-                        color = (255,0,0)
-
-                    detectedPeople.append(name)
-                    
-
-                    cv2.putText(frame,name,(round(x),round(y-10)),cv2.FONT_HERSHEY_COMPLEX_SMALL,color=color,thickness=1,fontScale=1)
-                    cv2.rectangle(frame,(round(x),round(y)), (round(w),round(h)),
-                                color,
-                                3)
-
-            return frame,detectedPeople
-        
-
-
-    def getEmbedding(self,face=None,imagePath=None,extractFace = False):
-
+        img = Image.fromarray(img)
 
         if imagePath is not None:
 
             img = cv2.imread(imagePath)
-            img = cv2.cvtColor(img,cv2.COLOR_BGR2RGB)
+            img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
 
-            frame = PIL.Image.fromarray(img)
-        elif face is not None:
-            frame = face
-        else:
+            img = Image.fromarray(img)
+        elif frame is None:
             raise Exception()
         """
         extractFace = True if the face has not been extracted
         """
 
         if extractFace:
-            face = (self.cascade.forward(frame)).permute(1,2,0).int().numpy()
+            face = self.cascade.forward(img)
 
+            if isinstance(face, list):
+                raise Exception(f"Image should have only a face {len(face)} found")
 
-        face = np.asarray(face)
-        
+            if face is None:
+                return None
+
+            img = face.permute(1, 2, 0).int().numpy()
+
+        face = np.asarray(img)
+
         sample = [np.asarray(face, 'float32')]
         # prepare the face for the model, e.g. center pixels
         sample = preprocess_input(sample, version=2)
@@ -105,40 +106,35 @@ class FacialRecog:
 
         return yhat
 
+    def loadPeople(self, peopleData):
 
-    
-    def loadPeople(self,trainingDirectory):
+        for person in peopleData:
 
-        """
-        trainingDirectory should have the next structure
-        trainingDirectory/
-                nameperson1/
-                    person1image
-                nameperson2/
-                    person2image
-                
-                ....
-                namepersonn/
-                    personNimage
-        
-        """
+            if person["images"] != []:
 
+                embeddings = self.loadEmbeddings(person["images"])
 
-        for personName in os.listdir(trainingDirectory):
+                if embeddings != []:
+                    self.knownPeople[person["name"]] = embeddings
 
-            personPath = f"{trainingDirectory}/{personName}"
+    # Si no detecta una cara omite getEmbedding
 
-            
+    def loadEmbeddings(self, images):
 
-            
-            if os.path.isdir(personPath):
-            
-                pathPersonImage = personPath + "/" + os.listdir(personPath)[0]
+        embeddings = []
 
-                self.knownPeople[personName] = self.getEmbedding(imagePath=pathPersonImage,extractFace=True)
+        for image in images:
 
+            frame = Image.open(requests.get(image, stream=True).raw)
 
-    def is_match(self,ID_embedding, subject_embedding,thresh=0.4):
+            embedding = self.getEmbedding(frame=frame, extractFace=True)
+
+            if embedding is not None:
+                embeddings.append(embedding)
+
+        return embeddings
+
+    def is_match(self, ID_embedding, subject_embedding, thresh=0.6):
         # calculate distance between embeddings
         score = cosine(ID_embedding, subject_embedding)
 
@@ -147,38 +143,28 @@ class FacialRecog:
         else:
             return False
 
-
-    def classifyFace(self,frame):
+    def classifyFace(self, frame):
 
         matchFound = False
 
-        subjectEmbedding = self.getEmbedding(face=frame,extractFace=False)
+        subjectEmbedding = self.getEmbedding(frame=frame, extractFace=False)
 
-        for name, knownEmbedding in self.knownPeople.items():
+        for name, embeddings in self.knownPeople.items():
 
-            if self.is_match(knownEmbedding.flatten(),subjectEmbedding.flatten()):
+            for personEmbedding in embeddings:
 
-                print(f"{name} esta en la camara")
-                matchFound=True
+                if self.is_match(personEmbedding.flatten(), subjectEmbedding.flatten()):
+                    matchFound = True
 
-                return name
+                    return name
 
         if not matchFound:
-            print(f"Se ha detectado a un desconocido")
-            
             return "Desconocido"
 
-
-
-
-    def checkFaces(self,testingDir):
-        
+    def checkFaces(self, testingDir):
 
         if os.path.isdir(testingDir):
 
             for image in os.listdir(testingDir):
-
                 imagePath = testingDir + "/" + image
                 self.classifyFace(imagePath)
-
-    

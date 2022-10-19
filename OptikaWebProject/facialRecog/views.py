@@ -1,5 +1,6 @@
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
+from django.shortcuts import redirect
 import json
 from azure.storage.blob import BlobClient
 from .facialrecognition import FacialRecog
@@ -39,12 +40,21 @@ def generateDetectionLog(request):
 
     binary = blob.download_blob().readall()
 
-    database.sendDetectionLog(binary,"daniel",modified,"known")
+    frame = cv2.imdecode(np.asarray(bytearray(binary), dtype="uint8"), cv2.IMREAD_COLOR)
+
+    detection = facialRecognizer.detect(frame)
+
+    if detection:
+
+        database.sendDetectionLog(detection['0'],",".join(detection),modified,"known")
 
 
     twin = iothub_registry_manager.get_twin(DEVICE_ID)
     twin_patch = Twin(properties= TwinProperties(desired={'readyToSend' : True}))
     twin = iothub_registry_manager.update_twin(DEVICE_ID, twin_patch, twin.etag)
 
-    
-    return JsonResponse({ "status": 200, "body": {}})
+def loadPeopleToRecog(request):
+
+        facialRecognizer.loadPeople(database.getPeople())
+
+        return redirect("/")

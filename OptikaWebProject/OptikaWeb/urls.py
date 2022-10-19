@@ -27,5 +27,5 @@ urlpatterns = [
     path('mainPage/', optViews.mainPage,name="mainPage"),
     path('liveCam/', optViews.liveCam,name="liveCam"),
     path('detections/', optViews.detections, name="detections"),
-    path('api/',include(facialRecogUrls)),    
+    path('api/',include(facialRecogUrls)),
 ]

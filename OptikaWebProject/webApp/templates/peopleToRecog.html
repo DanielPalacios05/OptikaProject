@@ -10,7 +10,7 @@
   </head>
   <body class="bg-dark text-white">
     <a
-      href="/"
+      href="/mainPage"
       class="btn btn-primary"
       style="margin-left: 25px; margin-bottom: 25px"
       >Home</a
@@ -24,11 +24,19 @@
       Cargar mas personas
     </button>
     <a
-      href="/peopleToRecog/addPerson"
+      href="{% url 'addPerson' %}"
       class="btn btn-primary"
       style="margin-left: 25px"
       >Añadir persona</a
     >
+
+    <a
+      href="{% url 'loadPeople' %}"
+      class="btn btn-primary"
+      style="margin-left: 25px"
+      >Cargar personas a reconocer</a>
+
+
     <!-- Modal dialog START -->
     <div
       class="modal fade text-dark"

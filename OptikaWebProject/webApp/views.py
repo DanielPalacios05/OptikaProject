@@ -8,16 +8,14 @@ import firebase_admin
 import threading
 from firebase_admin import credentials
 from firebase_admin import firestore
-import winsound #sonidos
+from OptikaWeb.bdconnect import FirebaseManager
+from facialRecog.facialrecognition import FacialRecog
 
-path = os.path.join(os.path.dirname(__file__), 'optika-6e7bd-firebase-adminsdk-1c4j0-e8dba28093.json')
 
-# setting up firebase
-cred = credentials.Certificate(path)
-app = firebase_admin.initialize_app(cred) 
-db = firebase_admin.firestore.client()
 
-# app = FirebaseManager() Daniel lo definió de esta manera, pero Juan y yo lo teniamos diferente 
+
+app = FirebaseManager() #Daniel lo definió de esta manera, pero Juan y yo lo teniamos diferente 
+facialRecognizer = FacialRecog()
 
 def home(request):
     return render(request, 'home.html')
@@ -66,8 +64,10 @@ def about(request):
 
     return render(request, 'about.html', {})
 
-
 def detections(request):
+
+    db = FirebaseManager.db
+
     detections_ref = db.collection(u'Detections')
 
     
@@ -90,13 +90,11 @@ def detections(request):
                 #para que solo envie alertas por cada registro nuevo, y no por los varios que se cargan
                 if(contador == cantidad and cantidad < 2): 
                     print("BRO MOMENTO")
-                    winsound.PlaySound("sonidoConocido.wav", winsound.SND_FILENAME)
                     send_email('optikaeafit@gmail.com')
                     #escribir el correo aqui 
 
             elif change.type.name == 'MODIFIED':
                 print(f'Modified: {change.document.id}')
-                winsound.PlaySound('sonidoConocido.WAV', winsound.SND_FILENAME)
             elif change.type.name == 'REMOVED':
                 print(f'Removed: {change.document.id}')
                 delete_done.set()

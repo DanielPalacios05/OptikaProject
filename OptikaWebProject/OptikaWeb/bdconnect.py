@@ -4,6 +4,9 @@ import firebase_admin
 from firebase_admin import credentials
 from firebase_admin import  storage
 from firebase_admin import firestore
+import requests
+import urllib
+from PIL import Image
 
 import cv2
 
@@ -28,7 +31,7 @@ class FirebaseManager:
 
     def sendDetectionLog(self,image,name,date,known,db=db):
 
-        my_datetime=date.astimezone(pytz.timezone('America/Bogota'))
+        my_datetime=date.astimezone(pytz.timezone('Etc/GMT+5'))
 
         my_datetime_str =  my_datetime.strftime('%Y-%m-%d-%H:%M:%S-')
 
@@ -80,6 +83,37 @@ class FirebaseManager:
             detections.append(doc_dict)
 
         return detections
+
+    def getPeople(self,db=db):
+
+        people = []
+
+        knownPeople = db.collection(u'KnownPeople').stream()
+
+        for person in knownPeople:
+
+            p = person.to_dict()
+
+            for i in range(len(p["images"])):
+
+                response = Image.open(requests.get(p["images"][i], stream = True).raw)
+
+                p["images"][i] = response
+
+            people.append(p)
+        
+        return people
+
+
+
+
+
+            
+
+
+
+
+
 
 
 
