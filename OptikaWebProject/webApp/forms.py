@@ -8,9 +8,8 @@ class PersonForm(forms.Form):
 
 class FileForm(forms.Form):
 
-    image = forms.FileField(label="Imagen:",widget=forms.ClearableFileInput(attrs={
+    image = forms.FileField(required=True,label="Imagen:",widget=forms.ClearableFileInput(attrs={
             "class":"form-control pictureInput",
-            "onchange":"addNewInput()",
             "autocomplete":"off"}
     )
     )

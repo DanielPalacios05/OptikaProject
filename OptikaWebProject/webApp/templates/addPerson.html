@@ -11,7 +11,7 @@
             <div class="row">
                 <div class="col-md-12">
                     <h1>Añadir Persona</h1>
-                    <form id="form">
+                    <form method="post" enctype="multipart/form-data" id="form">
                         <div class="form-group">
                                 <div>
                                     {{nameForm.name.label_tag}}
@@ -19,7 +19,8 @@
                             {{nameForm.name}}
                         </div>
                         <div class="form-group" id="pictureInputs">
-
+                            {% csrf_token %}
+                            {{fileForms.management_form}}
                             {% for form in fileForms %}
                             <div class="form-group">
 
@@ -49,111 +50,42 @@
     </body>
     -
     <script>
-        function addNewInput() {
-            let pictureInputs = document.getElementById("pictureInputs");
-            let inputs = pictureInputs.getElementsByTagName("div").length;
 
-            if (inputs >= 10) 
+        let totalForms = document.querySelector("#id_form-TOTAL_FORMS")
+        let pictureInputs = document.getElementById("pictureInputs");
+        let inputs = pictureInputs.getElementsByClassName("form-group");
+
+        inputs[0].addEventListener('change',addNewInput)
+        
+
+        function addNewInput() {
+
+            let inputSize = inputs.length-1
+            let formRegex = RegExp(`form-(\\d){1}-`,'g')
+        
+
+            if (inputSize >= 9)
+
                 return alert("No se permite subir mas de 10 imagenes a la vez.");
             
 
-            let newInput = document.createElement("div");
+            inputs[inputSize].removeEventListener('change',addNewInput)
+
+
+
+            inputSize++
+
+
+            let newInput = inputs[0].cloneNode(true)
+
+            newInput.innerHTML =  newInput.innerHTML.replace(formRegex, `form-${inputSize}-`)
 
             pictureInputs.appendChild(newInput);
-            newInput.outerHTML = `<div class="form-group">
-                  <label for="picture">Picture:</label>
-                  <input
-                    type="file"
-                    class="form-control pictureInput"
-                    name="picture"
-                    onchange="addNewInput()"
-                  />
-                </div>`;
+
+            newInput.addEventListener('change',addNewInput)
+            
+            totalForms.setAttribute('value', `${inputSize+1}`)
         }
     </script>
-    <script type="module">
-        // Import the functions you need from the SDKs you need
-        import {initializeApp} from "https://www.gstatic.com/firebasejs/9.9.4/firebase-app.js";
-        import {
-            getFirestore,
-            addDoc,
-            updateDoc,
-            doc,
-            collection
-        } from "https://www.gstatic.com/firebasejs/9.9.4/firebase-firestore.js";
-        import {getStorage, ref, uploadBytesResumable, getDownloadURL} from "https://www.gstatic.com/firebasejs/9.9.4/firebase-storage.js";
 
-        const firebaseConfig = {
-            apiKey: "AIzaSyBBCioy9g_Vd5o8l8NCQ3iPXu6tVGfil0c",
-            authDomain: "optika-6e7bd.firebaseapp.com",
-            databaseURL: "https://optika-6e7bd-default-rtdb.firebaseio.com",
-            projectId: "optika-6e7bd",
-            storageBucket: "optika-6e7bd.appspot.com",
-            messagingSenderId: "101731463535",
-            appId: "1:101731463535:web:6305f94fa27c289e8e389a",
-            measurementId: "G-1LJ84D06HZ"
-        };
-
-        // Initialize Firebase
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
-
-        document.getElementById("form").addEventListener("submit", submitForm);
-
-        async function submitForm(e) {
-            e.preventDefault();
-            let inputs = document.getElementsByClassName("pictureInput");
-
-            let i = 0;
-            for (let input of inputs) {
-                if (input.files[0]) 
-                    i++;
-                
-            }
-
-            document.getElementById("totalPictures").innerText = `/ ${i} imagenes subidas.`;
-
-            let urlArray = [];
-
-            let userDoc = await addDoc(collection(db, "KnownPeople"), {name: document.getElementById("name").value});
-
-            for (let input of inputs) {
-                if (input.files[0]) {
-                    let url = await uploadImagePromise(userDoc.id, input.files[0]);
-                    urlArray.push(url);
-                }
-            }
-
-            updateDoc(doc(db, `KnownPeople/${
-                userDoc.id
-            }`), {images: urlArray});
-        }
-
-        function uploadImagePromise(uid, image) {
-            return new Promise((res, rej) => {
-                let storage = getStorage();
-                let storageRef = ref(storage, `KnownPeople/${uid}/${
-                    image.name
-                }`);
-
-                let task = uploadBytesResumable(storageRef, image);
-
-                task.on("state-changed", (snapshot) => {
-                    let percent = Math.round((snapshot.bytesTransferred / snapshot.totalBytes) * 100);
-                    document.getElementById("uploadStatus").innerText = `${
-                        image.name
-                    }: ${percent}%`;
-                }, (err) => {
-                    rej(err);
-                }, () => {
-                    let amount = document.getElementById("amount");
-                    amount.innerText = Number(amount.innerText) + 1;
-
-                    getDownloadURL(task.snapshot.ref).then((url) => {
-                        res(url);
-                    });
-                });
-            });
-        }
-    </script>
 </html>

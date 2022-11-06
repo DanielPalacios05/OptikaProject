@@ -1,4 +1,4 @@
-from django.shortcuts import render
+from django.shortcuts import render,redirect
 from django.http import HttpResponse, HttpResponseRedirect
 from django.template.loader import get_template #para poder renderizar el HTML del correo
 from django.core.mail import EmailMultiAlternatives #Funcion que tiene Django para mandar correos
@@ -22,11 +22,33 @@ def mainPage(request):
 
 def addPerson(request):
 
-    nameform = PersonForm()
-    fileForm = FileFormset()
+    if request.method == 'GET':
+        nameform = PersonForm()
+        fileForm = FileFormset()
+    elif request.method == 'POST':
+        
+        nameform = PersonForm(request.POST)
+        fileForms = FileFormset(request.POST,request.FILES)
+
+        fileList = []
 
 
-    return render(request, 'addPerson.html',{'nameForm':nameform,'fileForms':FileFormset})
+        if nameform.is_valid():
+
+            for form in fileForms:
+
+                if form.is_valid() and form.has_changed():
+                    
+                    fileList.append(form.cleaned_data["image"])
+          
+        print(fileList)
+            
+        return redirect("/")
+
+
+
+
+    return render(request, 'addPerson.html',{'nameForm':nameform,'fileForms':fileForm})
 
 def liveCam(request):
     return render(request, 'liveCam.html')
