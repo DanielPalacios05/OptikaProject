@@ -7,7 +7,7 @@ from .facialrecognition import FacialRecog
 from azure.iot.hub import IoTHubRegistryManager
 from azure.iot.hub.models import Twin, TwinProperties
 import os
-from OptikaWeb.bdconnect import FirebaseManager
+from OptikaWeb.bdconnect import *
 import numpy as np
 import cv2
 
@@ -15,12 +15,12 @@ import cv2
 # Create your views here.
 facialRecognizer = FacialRecog()
 
-database = FirebaseManager()
-
-connect_str = os.environ.get("APP_CONN")
+STORAGE_CONNECTION_STRING = os.environ.get("STORAGE_CONN")
 
 IOTHUB_CONNECTION_STRING = os.environ.get("DEVICE_CONN")
-DEVICE_ID = "testdevice"
+
+DEVICE_ID = os.environ.get("DEVICE_ID")
+
 iothub_registry_manager = IoTHubRegistryManager(IOTHUB_CONNECTION_STRING)
 
 
@@ -34,7 +34,7 @@ def generateDetectionLog(request):
     
     twin = iothub_registry_manager.update_twin(DEVICE_ID, twin_patch, twin.etag)
 
-    blob = BlobClient.from_connection_string(connect_str,"device-upload","testdevice/frame.jpg")
+    blob = BlobClient.from_connection_string(STORAGE_CONNECTION_STRING,"device-upload",f"{DEVICE_ID}/frame.jpg")
 
     modified = blob.get_blob_properties().last_modified
 
@@ -46,7 +46,7 @@ def generateDetectionLog(request):
 
     if detection:
 
-        database.sendDetectionLog(detection['0'],",".join(detection),modified,"known")
+        sendDetectionLog(detection['0'],",".join(detection),modified,"known")
 
 
     twin = iothub_registry_manager.get_twin(DEVICE_ID)
@@ -55,6 +55,10 @@ def generateDetectionLog(request):
 
 def loadPeopleToRecog(request):
 
-        facialRecognizer.loadPeople(database.getPeople())
+    """This function will happen everytime"""
 
-        return redirect("/")
+    facialRecognizer.loadPeople(getPeople())
+
+    return redirect("/")
+
+

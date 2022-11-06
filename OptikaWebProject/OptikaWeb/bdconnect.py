@@ -10,41 +10,40 @@ from PIL import Image
 
 import cv2
 
+cred = credentials.Certificate("optika-6e7bd-firebase-adminsdk-1c4j0-66656df18f.json")
 
-
-class FirebaseManager:
-
-    cred = credentials.Certificate("optika-6e7bd-firebase-adminsdk-1c4j0-66656df18f.json")
-
-    app = firebase_admin.initialize_app(cred, {
+app = firebase_admin.initialize_app(cred, {
         'storageBucket': 'optika-6e7bd.appspot.com'
     })
 
 
-    bucket = storage.bucket()
+bucket = storage.bucket()
 
-    db = firestore.client()
-
-
+db = firestore.client()
 
 
 
-    def sendDetectionLog(self,image,name,date,known,db=db):
-
-        my_datetime=date.astimezone(pytz.timezone('Etc/GMT+5'))
-
-        my_datetime_str =  my_datetime.strftime('%Y-%m-%d-%H:%M:%S-')
 
 
-        blobname = name+my_datetime_str+".jpg"
 
-        blob = self.upload_blob(f"DetectionLog/user1/{blobname}", image)
 
-        blob.make_public()
 
-        blobLink = blob.public_url
+def sendDetectionLog(image,name,date,known):
 
-        doc_ref = db.collection(u'Detections').add({
+    my_datetime=date.astimezone(pytz.timezone('Etc/GMT+5'))
+
+    my_datetime_str =  my_datetime.strftime('%Y-%m-%d-%H:%M:%S-')
+
+
+    blobname = name+my_datetime_str+".jpg"
+
+    blob = upload_blob(f"DetectionLog/user1/{blobname}", image)
+
+    blob.make_public()
+
+    blobLink = blob.public_url
+
+    doc_ref = db.collection(u'Detections').add({
             u'img_url': blobLink,
             u'known': known,
             u'datetime': my_datetime,
@@ -57,7 +56,7 @@ class FirebaseManager:
         #name
         #known false (this one must be changed)
 
-    def upload_blob(self,destination_blob_name,contents,bucket=bucket):
+def upload_blob(destination_blob_name,contents):
         """Uploads a file to the bucket."""
         # The ID of your GCS bucket
         # bucket_name = "your-bucket-name"
@@ -72,7 +71,7 @@ class FirebaseManager:
 
         return blob
 
-    def getDetections(self,db=db):
+def getDetections():
         
         detections_ref = db.collection(u'Detections')
         docs = detections_ref.stream()
@@ -84,7 +83,7 @@ class FirebaseManager:
 
         return detections
 
-    def getPeople(self,db=db):
+def getPeople():
 
         people = []
 

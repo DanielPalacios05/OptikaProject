@@ -4,17 +4,11 @@ from django.template.loader import get_template #para poder renderizar el HTML d
 from django.core.mail import EmailMultiAlternatives #Funcion que tiene Django para mandar correos
 from django.conf import settings #para traer la informacion del correo
 import os, sys
-import firebase_admin
 import threading
-from firebase_admin import credentials
-from firebase_admin import firestore
-from OptikaWeb.bdconnect import FirebaseManager
+from OptikaWeb.bdconnect import *
 from facialRecog.facialrecognition import FacialRecog
+from .forms import FileFormset,PersonForm
 
-
-
-
-app = FirebaseManager() #Daniel lo definió de esta manera, pero Juan y yo lo teniamos diferente 
 facialRecognizer = FacialRecog()
 
 def home(request):
@@ -27,7 +21,12 @@ def mainPage(request):
     return render(request, 'mainPage.html')
 
 def addPerson(request):
-    return render(request, 'addPerson.html')
+
+    nameform = PersonForm()
+    fileForm = FileFormset()
+
+
+    return render(request, 'addPerson.html',{'nameForm':nameform,'fileForms':FileFormset})
 
 def liveCam(request):
     return render(request, 'liveCam.html')
@@ -66,7 +65,7 @@ def about(request):
 
 def detections(request):
 
-    db = FirebaseManager.db
+
 
     detections_ref = db.collection(u'Detections')
 
