@@ -23,6 +23,14 @@ RUN apt-get update \
   && apt-get install -y --no-install-recommends openssh-server \
   && echo "$SSH_PASSWD" | chpasswd
 
+COPY sshd_config /etc/ssh/
+COPY init.sh /usr/local/bin/
+
+RUN chmod u+x /usr/local/bin/init.sh
+EXPOSE 8000 2222
+
+
+
 RUN sed -i -e's/^from keras.engine.topology import get_source_inputs/from keras.utils.layer_utils import get_source_inputs/' /usr/local/lib/python3.10/site-packages/keras_vggface/models.py
 
 
@@ -30,4 +38,4 @@ EXPOSE 8000 2222
 
 RUN pip install pytz
 
-CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
+ENTRYPOINT [ "init.sh" ]

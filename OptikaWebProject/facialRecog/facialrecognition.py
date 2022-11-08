@@ -9,49 +9,49 @@ from PIL import Image
 from facenet_pytorch import MTCNN, extract_face
 import torch
 import numpy as np
+from OptikaWeb.bdconnect import *
+
+import pickle
 
 
-class FacialRecog:
 
-    def __init__(self):
+knownPeople = {}  # {name: [embeddings]}
+torchdevice = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
-        self.knownPeople = {}  # {name: [embeddings]}
+cascade = MTCNN(image_size=240, margin=40, device=torchdevice, post_process=False)
 
-        torchdevice = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+model = VGGFace(model='resnet50', include_top=False, input_shape=(240, 240, 3), pooling='avg')
 
-        self.cascade = MTCNN(image_size=240, margin=40, device=torchdevice, post_process=False)
-        self.model = VGGFace(model='resnet50', include_top=False, input_shape=(240, 240, 3), pooling='avg')
+def jpgFromBlob(blob):
 
-    def jpgFromBlob(self, blob):
+    # cv2.imencode(".jpg",frame)[1].tobytes()
+    frame = cv2.imdecode(blob)
 
-        # cv2.imencode(".jpg",frame)[1].tobytes()
-        frame = cv2.imdecode(blob)
+    return frame
 
-        return frame
+def detect(frame):
 
-    def detect(self, frame):
+# 0 is used for grayscale image
 
-        # 0 is used for grayscale image
+    boxes, probs = cascade.detect(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB))
 
-        boxes, probs = self.cascade.detect(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB))
+    detectedPeople = []
 
-        detectedPeople = []
+    if boxes is not None:
+        filterProbs = probs > 0.90
 
-        if boxes is not None:
-            filterProbs = probs > 0.90
+        boxes = boxes[filterProbs]
 
-            boxes = boxes[filterProbs]
+        for (x, y, w, h) in boxes:
+            face = extract_face(frame, (x, y, w, h), image_size=240).permute(1, 2, 0).int().numpy()
 
-            for (x, y, w, h) in boxes:
-                face = extract_face(frame, (x, y, w, h), image_size=240).permute(1, 2, 0).int().numpy()
+            name = classifyFace(face)
 
-                name = self.classifyFace(face)
+            if name == "Desconocido":
 
-                if name == "Desconocido":
-
-                    color = (0, 0, 255)
-                else:
-                    color = (255, 0, 0)
+                color = (255, 0, 0)
+            else:
+                color = (0, 0, 255)
 
                 detectedPeople.append(name)
 
@@ -61,11 +61,11 @@ class FacialRecog:
                               color,
                               3)
 
-            return frame, detectedPeople
+        return frame, detectedPeople
 
-        return None
+    return None
 
-    def getEmbedding(self, frame=None, imagePath=None, extractFace=False):
+def getEmbedding(frame=None, imagePath=None, extractFace=False):
 
         nimg = np.asarray(frame,dtype=np.uint8)
 
@@ -86,7 +86,7 @@ class FacialRecog:
         """
 
         if extractFace:
-            face = self.cascade.forward(img)
+            face = cascade.forward(img)
 
             if isinstance(face, list):
                 raise Exception(f"Image should have only a face {len(face)} found")
@@ -102,24 +102,24 @@ class FacialRecog:
         # prepare the face for the model, e.g. center pixels
         sample = preprocess_input(sample, version=2)
         # perform prediction
-        yhat = self.model.predict(sample)
+        yhat = model.predict(sample)
 
         return yhat
 
-    def loadPeople(self, peopleData):
+def loadPeople(peopleData):
 
         for person in peopleData:
 
             if person["images"] != []:
 
-                embeddings = self.loadEmbeddings(person["images"])
+                embeddings = loadEmbeddings(person["images"])
 
                 if embeddings != []:
-                    self.knownPeople[person["name"]] = embeddings
+                    knownPeople[person["name"]] = embeddings
 
     # Si no detecta una cara omite getEmbedding
 
-    def loadEmbeddings(self, images):
+def loadEmbeddings(images):
 
         embeddings = []
 
@@ -127,44 +127,49 @@ class FacialRecog:
 
             frame = Image.open(requests.get(image, stream=True).raw)
 
-            embedding = self.getEmbedding(frame=frame, extractFace=True)
+            embedding = getEmbedding(frame=frame, extractFace=True)
 
             if embedding is not None:
                 embeddings.append(embedding)
 
         return embeddings
 
-    def is_match(self, ID_embedding, subject_embedding, thresh=0.6):
+def is_match(ID_embedding, subject_embedding, thresh=0.6):
         # calculate distance between embeddings
         score = cosine(ID_embedding, subject_embedding)
+        print(score)
 
         if score <= thresh:
             return True
         else:
             return False
 
-    def classifyFace(self, frame):
+def classifyFace(frame):
 
-        matchFound = False
+    matchFound = False
 
-        subjectEmbedding = self.getEmbedding(frame=frame, extractFace=False)
+    subjectEmbedding = getEmbedding(frame=frame, extractFace=False)
 
-        for name, embeddings in self.knownPeople.items():
+    docs = db.collection(u'KnownPeople').stream()
 
-            for personEmbedding in embeddings:
 
-                if self.is_match(personEmbedding.flatten(), subjectEmbedding.flatten()):
-                    matchFound = True
 
-                    return name
+    for doc in docs:
+
+        for personImage in doc.get('images'):
+
+            if is_match(pickle.loads(personImage['embedding']).flatten(), subjectEmbedding.flatten()):
+                matchFound = True
+
+                return doc.id
 
         if not matchFound:
             return "Desconocido"
 
-    def checkFaces(self, testingDir):
+def checkFaces(testingDir):
 
         if os.path.isdir(testingDir):
 
             for image in os.listdir(testingDir):
                 imagePath = testingDir + "/" + image
-                self.classifyFace(imagePath)
+                classifyFace(imagePath)

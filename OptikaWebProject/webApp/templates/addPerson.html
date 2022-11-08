@@ -12,6 +12,7 @@
                 <div class="col-md-12">
                     <h1>Añadir Persona</h1>
                     <form method="post" enctype="multipart/form-data" id="form">
+                        {% csrf_token %}
                         <div class="form-group">
                                 <div>
                                     {{nameForm.name.label_tag}}
@@ -19,7 +20,7 @@
                             {{nameForm.name}}
                         </div>
                         <div class="form-group" id="pictureInputs">
-                            {% csrf_token %}
+                            
                             {{fileForms.management_form}}
                             {% for form in fileForms %}
                             <div class="form-group">

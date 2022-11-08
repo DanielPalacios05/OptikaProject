@@ -6,10 +6,10 @@ from django.conf import settings #para traer la informacion del correo
 import os, sys
 import threading
 from OptikaWeb.bdconnect import *
-from facialRecog.facialrecognition import FacialRecog
+from facialRecog.facialrecognition import *
 from .forms import FileFormset,PersonForm
+from .workers import loadFacesToFirebase
 
-facialRecognizer = FacialRecog()
 
 def home(request):
     return render(request, 'home.html')
@@ -41,7 +41,7 @@ def addPerson(request):
                     
                     fileList.append(form.cleaned_data["image"])
           
-        print(fileList)
+        loadFacesToFirebase(fileList,nameform.cleaned_data["name"])
             
         return redirect("/")
 

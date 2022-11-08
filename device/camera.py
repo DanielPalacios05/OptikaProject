@@ -12,7 +12,7 @@ stor = "DefaultEndpointsProtocol=https;AccountName=optikaimages;AccountKey=nrYz2
 
 def create_client():
     # Instantiate client
-    client = IoTHubDeviceClient.create_from_connection_string(CONNECTION_STRING,websockets=True)
+    client = IoTHubDeviceClient.create_from_connection_string(CONNECTION_STRING)
 
     # Define behavior for receiving twin desired property patches
     def twin_patch_handler(twin_patch):
@@ -78,7 +78,6 @@ device_client.connect()
 
 
 
-video_capture = cv2.VideoCapture(0)
 
 while True:
 
@@ -89,12 +88,9 @@ while True:
         
         storage_info = device_client.get_storage_info_for_blob(FILE_NAME)
 
+        video_capture = cv2.VideoCapture(0)
 
         ret, frame = video_capture.read()
-
-        video_capture.release()
-
-        
 
         blobImage = cv2.imencode(".jpg",frame)[1].tobytes()
 
@@ -120,6 +116,10 @@ while True:
             device_client.notify_blob_upload_status(
                 storage_info["correlationId"], False, result.status_code, str(result)
             )
+        video_capture.release()
+    
+    
+
     time.sleep(30)
 
 

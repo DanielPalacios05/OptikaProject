@@ -5,8 +5,9 @@ from firebase_admin import credentials
 from firebase_admin import  storage
 from firebase_admin import firestore
 import requests
-import urllib
+import uuid
 from PIL import Image
+
 
 import cv2
 
@@ -28,7 +29,7 @@ db = firestore.client()
 
 
 
-def sendDetectionLog(image,name,date,known):
+def sendDetectionLog(image,name,date):
 
     my_datetime=date.astimezone(pytz.timezone('Etc/GMT+5'))
 
@@ -45,7 +46,7 @@ def sendDetectionLog(image,name,date,known):
 
     doc_ref = db.collection(u'Detections').add({
             u'img_url': blobLink,
-            u'known': known,
+            u'known': not name == 'Desconocido',
             u'datetime': my_datetime,
             u'name': name
         })
@@ -102,6 +103,25 @@ def getPeople():
             people.append(p)
         
         return people
+
+def uploadPersonImage(personName,image,embedding):
+
+    filename = str(uuid.uuid4())
+
+
+    blob = upload_blob(f"KnownPeople/{personName}/{filename}.jpg", image)
+
+    blob.make_public()
+
+    blobLink = blob.public_url
+
+    imageObj = {"image":blobLink,"embedding":embedding}
+
+    doc_ref = db.collection(u'KnownPeople').document(personName).set({
+            u'images': firestore.ArrayUnion([imageObj])},merge=True)
+    
+    
+
 
 
 
