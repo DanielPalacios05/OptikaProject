@@ -12,7 +12,7 @@ stor = "DefaultEndpointsProtocol=https;AccountName=optikaimages;AccountKey=nrYz2
 
 def create_client():
     # Instantiate client
-    client = IoTHubDeviceClient.create_from_connection_string(CONNECTION_STRING)
+    client = IoTHubDeviceClient.create_from_connection_string(CONNECTION_STRING,websockets=True)
 
     # Define behavior for receiving twin desired property patches
     def twin_patch_handler(twin_patch):
