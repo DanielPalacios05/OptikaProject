@@ -1,31 +1,23 @@
 <!DOCTYPE html>
-<!-- MINUTO 40-->
 <html>
 <head>
     <meta name="viewport" content="width=device-width,initial-scale=1.0"> 
-    <!--^^hacer que la pagina sea responsive--> 
-
     {% load static %}
     <link rel="stylesheet" href="{% static 'styleMain.css'%}"> 
-    <!--^^conectar el css con el HTMl-->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@700&display=swap" rel="stylesheet">
-    <!--^^este es el fond, el estilo de letra-->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.1.2/css/fontawesome.min.css">
-    <!--^^este es un boton-->
 
 </head>
 <body>
     <section class="header">
-    <!--^^el nombre de la clase de esta seccion-->
         <nav>
-            <!-- <a href="create.html"><img src="images./logo1.png"> </a> -->
             <div class="nav-links" id="navLinks">
                 <i class="fa fa-times-circle" onclick="hideMenu()"></i>
                 <!-- ^^Le aniadimos un boton para que se peuda cerrar en los disposititvos mobiles -->
                 <ul>
-                    <li> <a href="http://127.0.0.1:8000/">Log out </a> </li>
+                    <li> <a href="{% url 'home' %}">Log out </a> </li>
                 </ul>
             </div>
             <i class="fa fa-bars" onclick="showMenu()"></i>
@@ -36,29 +28,12 @@
         
         <h1>Bienvenido, usuario!</h1>
         <p>
-            No hay nada que preocuparse <br> mientras cuentes con tu Optika ;)
-            <!--- br es un line brake -->
-            
+            No hay nada que preocuparse <br> mientras cuentes con tu Optika ;)      
         </p>
-        <!-- <a href="">Registrate</a>-->
         <a href="{% url 'liveCam' %}" class="hero-btn"> Camara en vivo</a>
         <a href="{% url 'detections' %}" class="hero-btn"> Historial de detecciones</a>
         <a href="{% url 'peopleToRecog' %}" class="hero-btn"> Gestion de personas conocidas</a>
-        <!-- PARA HACER QUE ESO SE VEA COMO UN BOTON, lo creamos en una clase y con CSS lo hacemos el boton -->
     </div>
-
-
-    <!-- JavaScript para mostrar el Menu -->
-    <script>
-
-        var navLinks = document.getElementById("navLinks");
-        function showMenu(){
-            navLinks.Style.right = "0";
-        }
-        function hideMenu(){
-            navLinks.Style.right = "-200px";
-        }
-    </script>
 
 </body>
 </html>

@@ -64,41 +64,40 @@ def addPerson(request):
 def liveCam(request):
     return render(request, 'liveCam.html')
 
-#ASI ES COMO TENIA DETECTIONS JUAN
-# def detections(request): 
-#     return render(request, 'detections.html', {'detections': app.getDetections()})
+#funcion para enviar el correo
+def send_email(mail, nombre, conocido, imagen):
+    
+    context = {'mail': mail, 'name': nombre, 'conocido': conocido, 'imagen': imagen}
 
-#funcion para emviar el correo
-def send_email(mail):
-    context = {'mail': mail}
-
-    template = get_template('correo.html')
+    template = get_template('correoB.html')
     content = template.render(context)
 
-    email = EmailMultiAlternatives( # estructura del correo
-        'Se ha detectado a una persona',
-        'God Bless',
-        settings.EMAIL_HOST_USER,
-        [mail]
-    )
+    if(conocido == "conocida"):
+        print("voy a mandar un correo de conocido")
+
+        email = EmailMultiAlternatives( # estructura del correo
+            'Se ha detectado a ' + nombre, #titulo del correo
+            'God Bless', #parametro necesario
+            settings.EMAIL_HOST_USER,
+            [mail]
+        )
+    if(conocido == "desconocida"):
+        print("voy a mandar un correo de desconocido")
+
+        email = EmailMultiAlternatives( 
+            'Se ha detectado a una persona desconocida!',
+            'God Bless',
+            settings.EMAIL_HOST_USER,
+            [mail]
+        )
 
     email.attach_alternative(content, 'text/html')
-    email.send()
-
-
-    print(mail)
-
-def about(request):
-    if request.method == 'POST':
-        mail = request.POST.get('mail')
-        send_email(mail)
-
-
-    return render(request, 'about.html', {})
+   
+    email.send() 
 
 def detections(request):
-    detections_ref = db.collection(u'Detections').order_by(u'datetime', direction=firestore.Query.DESCENDING)
-    
+    detections_ref = db.collection(u'Detections')
+
     # Create an Event for notifying main thread.
     delete_done = threading.Event()
     # Create a callback on_snapshot function to capture changes
@@ -107,38 +106,45 @@ def detections(request):
         cantidad = len(changes)
         contador = 0
 
-        #print(cantidad)
         print(u'Callback received query snapshot.')
         for change in changes:
             contador = contador + 1
-            #print(contador)
             if change.type.name == 'ADDED':
                 print(f'Added: {change.document.id}')
-                # print(f'se llama: {change.document.name}')
+                
                 #para que solo envie alertas por cada registro nuevo, y no por los varios que se cargan
                 if(contador == cantidad and cantidad < 2): 
-                    print("BRO MOMENTO")
-                    send_email('optikaeafit@gmail.com')
-                    #escribir el correo aqui 
 
-            elif change.type.name == 'MODIFIED':
-                print(f'Modified: {change.document.id}')
-            elif change.type.name == 'REMOVED':
-                print(f'Removed: {change.document.id}')
-                delete_done.set()
+                    idDetecion = change.document.id
+
+                    doc_ref = db.collection(u'Detections').document(idDetecion)
+                    doc = doc_ref.get() #obtener el documento de la persona detectada
+
+                    nombre = doc.to_dict()["name"]
+                    conocidoTrueFalse = doc.to_dict()["known"]
+                    imagen = doc.to_dict()["img_url"]
+
+                    print(conocidoTrueFalse) #test
+                    if(conocidoTrueFalse is True):
+                        conocido = "conocida"
+                        print("soy conocida")
+                    else:
+                        conocido = "desconocida"
+                        print("soy desconocida")
+
+                    send_email('optikaeafit@gmail.com', nombre, conocido, imagen)
 
     col_query = db.collection(u'Detections')
     # Watch the collection query
     query_watch = col_query.on_snapshot(on_snapshot)
+    docs = detections_ref.stream() 
 
-
-    docs = detections_ref.stream() #juan
     detections = []
     for doc in docs:
         doc_dict = doc.to_dict()
         doc_dict['id'] = doc.id
         detections.append(doc_dict)
-    return render(request, 'detections.html', {'detections': detections})
+    return render(request, 'detections.html', {'detections': detections})    
                             
 
 #--------------------------------------------------------------------------------------------------------
