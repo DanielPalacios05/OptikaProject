@@ -30,7 +30,7 @@
               style="padding: 10px; box-shadow: 0px 4px 5px black; cursor: pointer; display: flex; justify-content: space-between;"
             >
 			  {{ person.id }}
-              <a type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#modal-delete">Eliminar</a>
+              <a type="button" class="btn btn-danger" href="{% url 'delete-known-person' person.id %}">Eliminar</a>
             </h3>
             <div class="picturesContainer" style="flex-direction: column;">
 			  <div style="display: flex; flex-wrap: wrap;">
@@ -45,36 +45,37 @@
 					  <a id="delete-image-{{person.id}}-{{image.image}}" type="button" style="position: absolute; top: 0px; right: 0px; font-weight: bold; transform: translate(-20px, 20px)" class="btn btn-danger" onclick="">x</a>
 					</div>
 				  {% endfor %}
-              <div
-                class="img-thumbnail"
-                style="width: 250px; height: 80%; box-shadow: 0px 4px 5px black; margin: 10px; padding: 20px 20px 20px 20px; display: flex; justify-content: center; flex-direction: column"
-              >
-                <label
-                  for="picture"
-                  class="text-dark"
-                  style="font-weight: bold; font-size: 20px;"
-                >
-                  Imagen:
-                </label>
-                <input
-                  id="image-input${person.id}"
-                  type="file"
-                  class="form-control pictureInput"
-                  name="picture"
-                />
-              </div>
-              <div
-                id="uploadStatus${person.id}"
-                class="text-white"
-                style="margin: 0px 0px 0px 20px;"
-              ></div>
-            </li>
+				  <div
+					class="img-thumbnail"
+					style="width: 250px; height: 80%; box-shadow: 0px 4px 5px black; margin: 10px; padding: 20px 20px 20px 20px; display: flex; justify-content: center; flex-direction: column"
+				  >
+				  <label
+					for="picture"
+					class="text-dark"
+					style="font-weight: bold; font-size: 20px;"
+				  >
+					Imagen:
+				  </label>
+				  <input
+					id="image-input${person.id}"
+					type="file"
+					class="form-control pictureInput"
+					name="picture"
+				  />
+				  </div>
+				  <div
+					id="uploadStatus${person.id}"
+					class="text-white"
+					style="margin: 0px 0px 0px 20px;"
+				  ></div>
+				</div>
+			  </div>
+			</div>
 		{% endfor %}
 	  </ul>
 	  {% else %}
 	  <p>No people available</p>
 	  {% endif %}
-
 	</div>
     <a
       href="{% url 'addPerson' %}"
