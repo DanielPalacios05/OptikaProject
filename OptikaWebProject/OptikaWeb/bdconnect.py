@@ -104,6 +104,9 @@ def getPeople():
         
         return people
 
+def delKnownPerson(person_id):
+    db.collection(u'KnownPeople').document(person_id).delete()
+
 def uploadPersonImage(personName,image,embedding):
 
     filename = str(uuid.uuid4())
