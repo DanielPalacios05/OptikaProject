@@ -28,4 +28,5 @@ urlpatterns = [
     path('liveCam/', optViews.liveCam,name="liveCam"),
     path('detections/', optViews.detections, name="detections"),
     path('api/',include(facialRecogUrls)),
+    path('deleteKnown/<slug:id>', optViews.deletePerson, name="delete-known-person")
 ]
