@@ -30,7 +30,7 @@
               style="padding: 10px; box-shadow: 0px 4px 5px black; cursor: pointer; display: flex; justify-content: space-between;"
             >
 			  {{ person.id }}
-			  <a type="button" class="btn btn-danger" href="{% url 'delete-known-person' person.id %}" >Eliminar</a>
+              <a type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#modal-delete">Eliminar</a>
             </h3>
             <div class="picturesContainer" style="flex-direction: column;">
 			  <div style="display: flex; flex-wrap: wrap;">
