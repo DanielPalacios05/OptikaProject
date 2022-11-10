@@ -15,7 +15,18 @@ def home(request):
     return render(request, 'home.html')
 
 def peopleToRecog(request):
-    return render(request, 'peopleToRecog.html') 
+    people_ref = db.collection(u'KnownPeople')
+    people = people_ref.stream()
+    people_to_recog = []
+    for person in people:
+        people_dict = person.to_dict()
+        people_dict['id'] = person.id
+        people_to_recog.append(people_dict)
+    return render(request, 'peopleToRecog.html', {'people_to_recog': people_to_recog})
+
+def deletePerson(request, id):
+     delKnownPerson(id)
+     return redirect('/peopleToRecog/')    
 
 def mainPage(request):  
     return render(request, 'mainPage.html')
@@ -86,11 +97,7 @@ def about(request):
     return render(request, 'about.html', {})
 
 def detections(request):
-
-
-
-    detections_ref = db.collection(u'Detections')
-
+    detections_ref = db.collection(u'Detections').order_by(u'datetime', direction=firestore.Query.DESCENDING)
     
     # Create an Event for notifying main thread.
     delete_done = threading.Event()
