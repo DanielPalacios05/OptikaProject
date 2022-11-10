@@ -67,6 +67,7 @@ def upload_blob(destination_blob_name,contents):
         # destination_blob_name = "storage-object-name"
 
         blob = bucket.blob(destination_blob_name)
+        blob.reload()
 
         blob.upload_from_string(contents, content_type='image/jpeg')
 
