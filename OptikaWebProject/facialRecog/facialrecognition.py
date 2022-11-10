@@ -40,6 +40,8 @@ def detect(frame):
     if boxes is not None:
         filterProbs = probs > 0.90
 
+
+
         boxes = boxes[filterProbs]
 
         for (x, y, w, h) in boxes:
@@ -49,15 +51,15 @@ def detect(frame):
 
             if name == "Desconocido":
 
-                color = (255, 0, 0)
-            else:
                 color = (0, 0, 255)
+            else:
+                color = (0, 255, 0)
 
-                detectedPeople.append(name)
+            detectedPeople.append(name)
 
-                cv2.putText(frame, name, (round(x), round(y - 10)), cv2.FONT_HERSHEY_COMPLEX_SMALL, color=color, thickness=1,
+            cv2.putText(frame, name, (round(x), round(y - 10)), cv2.FONT_HERSHEY_COMPLEX_SMALL, color=color, thickness=1,
                             fontScale=1)
-                cv2.rectangle(frame, (round(x), round(y)), (round(w), round(h)),
+            cv2.rectangle(frame, (round(x), round(y)), (round(w), round(h)),
                               color,
                               3)
 
@@ -134,7 +136,7 @@ def loadEmbeddings(images):
 
         return embeddings
 
-def is_match(ID_embedding, subject_embedding, thresh=0.6):
+def is_match(ID_embedding, subject_embedding, thresh=0.3):
         # calculate distance between embeddings
         score = cosine(ID_embedding, subject_embedding)
         print(score)
@@ -156,15 +158,19 @@ def classifyFace(frame):
 
     for doc in docs:
 
+        print(doc.id)
+
         for personImage in doc.get('images'):
+
+            
 
             if is_match(pickle.loads(personImage['embedding']).flatten(), subjectEmbedding.flatten()):
                 matchFound = True
 
                 return doc.id
 
-        if not matchFound:
-            return "Desconocido"
+    if not matchFound:
+        return "Desconocido"
 
 def checkFaces(testingDir):
 

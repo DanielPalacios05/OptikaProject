@@ -27,6 +27,10 @@ DEBUG = True
 
 ALLOWED_HOSTS = ["optika.azurewebsites.net","0.0.0.0","127.0.0.1"]
 
+CSRF_TRUSTED_ORIGINS = [
+    'http://localhost:8000',
+    "https://optika.azurewebsites.net",
+]
 
 # Application definition
 

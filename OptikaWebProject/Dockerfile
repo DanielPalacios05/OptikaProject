@@ -17,9 +17,9 @@ RUN pip install --default-timeout=1000 --no-cache-dir -r requirements.txt
 COPY . .
 
 ENV SSH_PASSWD "root:Docker!"
-RUN apt-get update \
+RUN apt-get update  \
         && apt-get install -y --no-install-recommends dialog \
-        && apt-get update \
+         \
   && apt-get install -y --no-install-recommends openssh-server \
   && echo "$SSH_PASSWD" | chpasswd
 

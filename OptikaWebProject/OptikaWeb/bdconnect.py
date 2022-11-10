@@ -68,6 +68,8 @@ def upload_blob(destination_blob_name,contents):
 
         blob = bucket.blob(destination_blob_name)
 
+        blob.reload()
+
         blob.upload_from_string(contents, content_type='image/jpeg')
 
         return blob
@@ -114,6 +116,7 @@ def uploadPersonImage(personName,image,embedding):
     blob.make_public()
 
     blobLink = blob.public_url
+
 
     imageObj = {"image":blobLink,"embedding":embedding}
 
