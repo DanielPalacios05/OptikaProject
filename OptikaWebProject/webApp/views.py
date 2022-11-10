@@ -96,8 +96,8 @@ def send_email(mail, nombre, conocido, imagen):
     email.send() 
 
 def detections(request):
-    detections_ref = db.collection(u'Detections')
-
+    detections_ref = db.collection(u'Detections').order_by(u'datetime', direction=firestore.Query.DESCENDING)
+    
     # Create an Event for notifying main thread.
     delete_done = threading.Event()
     # Create a callback on_snapshot function to capture changes
