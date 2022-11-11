@@ -106,6 +106,13 @@ def getPeople():
 def delKnownPerson(person_id):
     db.collection(u'KnownPeople').document(person_id).delete()
 
+def delDetections():
+    detections_ref = db.collection(u'Detections')
+    docs = detections_ref.list_documents()    
+    for doc in docs:
+        print(f'Deleting doc {doc.id} => {doc.get().to_dict()}')
+        doc.delete()
+
 def uploadPersonImage(personName,image,embedding):
 
     filename = str(uuid.uuid4())

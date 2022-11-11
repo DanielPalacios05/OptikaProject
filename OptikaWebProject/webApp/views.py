@@ -29,6 +29,11 @@ def deletePerson(request, id):
      delKnownPerson(id)
      return redirect('/peopleToRecog/')    
 
+def deleteDetections(request):
+     delDetections()
+     return redirect('/detections/')    
+
+
 def mainPage(request):  
     return render(request, 'mainPage.html')
 
