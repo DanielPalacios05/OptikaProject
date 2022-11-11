@@ -24,11 +24,6 @@ db = firestore.client()
 
 
 
-
-
-
-
-
 def sendDetectionLog(image,name,date):
 
     my_datetime=date.astimezone(pytz.timezone('Etc/GMT+5'))
@@ -68,8 +63,6 @@ def upload_blob(destination_blob_name,contents):
 
         blob = bucket.blob(destination_blob_name)
 
-        blob.reload()
-
         blob.upload_from_string(contents, content_type='image/jpeg')
 
         return blob
@@ -105,6 +98,9 @@ def getPeople():
             people.append(p)
         
         return people
+
+def delKnownPerson(person_id):
+    db.collection(u'KnownPeople').document(person_id).delete()
 
 def uploadPersonImage(personName,image,embedding):
 

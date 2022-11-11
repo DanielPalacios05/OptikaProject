@@ -1,6 +1,7 @@
 <html>
   <head>
     <title>PeopleToRecog</title>
+	{% load static %}
     <link
       href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.1/dist/css/bootstrap.min.css"
       rel="stylesheet"
@@ -10,19 +11,72 @@
   </head>
   <body class="bg-dark text-white">
     <a
-      href="/mainPage"
+      href="{% url 'mainPage' %}"
       class="btn btn-primary"
       style="margin-left: 25px; margin-bottom: 25px"
       >Home</a
     >
-    <ul id="people-container" style="list-style-type: none"></ul>
-    <button
-      class="btn btn-primary"
-      id="load-more-people"
-      style="margin-left: 25px"
-    >
-      Cargar mas personas
-    </button>
+	<div class="people_">
+	  {% if people_to_recog %}
+	  <ul id="people-container" style="list-style-type: none">
+		{% for person in people_to_recog %} 
+		  <div
+			id="personNumber{{ forloop.counter0 }}"
+            class="person"
+            style="display: flex; margin: 10px; flex-direction: column;"
+          >
+            <h3
+              class="userInfo"
+              style="padding: 10px; box-shadow: 0px 4px 5px black; cursor: pointer; display: flex; justify-content: space-between;"
+            >
+			  {{ person.id }}
+              <a type="button" class="btn btn-danger" href="{% url 'delete-known-person' person.id %}">Eliminar</a>
+            </h3>
+            <div class="picturesContainer" style="flex-direction: column;">
+			  <div style="display: flex; flex-wrap: wrap;">
+				  {% for image in person.images %}
+					<div style="position: relative;">
+					  <img
+						  src={{ image.image }}
+						  alt="Image"
+						  class="img-thumbnail"
+						  style="width: 250px; box-shadow: 0px 4px 5px black; margin: 10px;"
+					  />
+					  <a id="delete-image-{{person.id}}-{{image.image}}" type="button" style="position: absolute; top: 0px; right: 0px; font-weight: bold; transform: translate(-20px, 20px)" class="btn btn-danger" onclick="">x</a>
+					</div>
+				  {% endfor %}
+				  <div
+					class="img-thumbnail"
+					style="width: 250px; height: 80%; box-shadow: 0px 4px 5px black; margin: 10px; padding: 20px 20px 20px 20px; display: flex; justify-content: center; flex-direction: column"
+				  >
+				  <label
+					for="picture"
+					class="text-dark"
+					style="font-weight: bold; font-size: 20px;"
+				  >
+					Imagen:
+				  </label>
+				  <input
+					id="image-input${person.id}"
+					type="file"
+					class="form-control pictureInput"
+					name="picture"
+				  />
+				  </div>
+				  <div
+					id="uploadStatus${person.id}"
+					class="text-white"
+					style="margin: 0px 0px 0px 20px;"
+				  ></div>
+				</div>
+			  </div>
+			</div>
+		{% endfor %}
+	  </ul>
+	  {% else %}
+	  <p>No people available</p>
+	  {% endif %}
+	</div>
     <a
       href="{% url 'addPerson' %}"
       class="btn btn-primary"
@@ -48,7 +102,7 @@
       <div class="modal-dialog" role="document">
         <div class="modal-content">
           <div class="modal-header">
-            <h5 class="modal-title text-dark">Eliminar Usuario</h5>
+            <h5 class="modal-title text-dark">Eliminar persona conocida</h5>
             <button
               type="button"
               class="close"
@@ -59,7 +113,9 @@
             </button>
           </div>
 
-          <div class="modal-body" id="modal-body"></div>
+          <div class="modal-body" id="modal-body">
+		  <p>¿Seguro que quieres elimanar a esta persona de la base de datos?</p>
+		  </div>
 
           <div class="modal-footer" id="modal-footer">
             <button
@@ -129,30 +185,6 @@
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
 
-    async function getKnownPeople(doc = undefined) {
-      let q = query(collection(db, "KnownPeople"), orderBy("name"), limit(10));
-      let knownPeople = [];
-
-      if (doc)
-        q = query(
-          collection(db, "KnownPeople"),
-          orderBy("name"),
-          limit(10),
-          startAfter(doc)
-        );
-      (await getDocs(q)).forEach((doc) => knownPeople.push(doc));
-
-      document
-        .getElementById("load-more-people")
-        .addEventListener("click", async () => {
-          (await getKnownPeople(knownPeople[knownPeople.length - 1])).forEach(
-            loadNewPerson
-          );
-        });
-
-      return knownPeople;
-    }
-
     function loadNewPerson(person) {
       let container = document.getElementById("people-container");
       let newPerson = document.createElement("div");
@@ -163,23 +195,6 @@
       let images = "";
       let imageCount = 0;
 
-      for (let image of person.data().images) {
-        imageCount++;
-        images += `
-			  <li style="text-decoration: none;">
-               <div style="position: relative;">
-                 <img
-                   src="${image}"
-                   alt="Image"
-                   class="img-thumbnail"
-                   style="width: 250px; box-shadow: 0px 4px 5px black; margin: 10px;"
-                 />
-				 <button id="delete-image-${person.id}-${image}" type="button" style="position: absolute; top: 0px; right: 0px; font-weight: bold; transform: translate(-20px, 20px)" class="btn btn-danger" onclick="">x</button>
-               </div>
-            </li>
-        `;
-      }
-
       newPerson.outerHTML = `<div
             id="personNumber${personCount}"
             class="person"
@@ -189,7 +204,7 @@
               class="userInfo"
               style="padding: 10px; box-shadow: 0px 4px 5px black; cursor: pointer; display: flex; justify-content: space-between;"
             >
-              ${person.data().name}
+              ${person.id}
               <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#modal-delete">Eliminar</button>
             </h3>
             <div class="picturesContainer" style="display: none; flex-direction: column;">

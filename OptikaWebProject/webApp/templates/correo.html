@@ -1,28 +1,53 @@
-
 <html>
+<meta name="viewpost" content="width=device-width, initial-scale=1.0">
+
+<tittle> Se ha detectado a una persona {{conocido}}!</tittle>
+<style type="text/css">
+    body{
+        margin: 0;
+        background-color: rgb(50, 48, 48);
+    }
+    table{
+        border-spacing: 0;
+    }
+    td {
+        padding: 0;
+    }
+    img {
+        border: 0;
+    }.wrapper{
+        width: 100%;
+        table-layout: fixed;
+        background-color: #cccccc;
+        padding-bottom: 60px;
+    }
+    .main{
+        background-color: #ffffff;
+        margin: 0 auto;
+        width: 100%;
+        max-width: 600px;
+        border-spacing: 0;
+        font-family: sans-serif;
+        color: #171a1b;
+    }
 
 
-    <head>
-        <!-- {% load static %}
-        <link rel="stylesheet" href="{% static 'style.css'%}">  -->
-        <style>
-            p{
-                font-size: 26px;
-                color: rgb(61, 98, 191)
-            }
-        </style>
-    </head>
 
-    <body>
-        <!-- <h1>{{mail}} recibirá un correo cuando se detecte algo</h1> -->
-        <h1>Usuario, hemos detectado la presencia de un negro!</h1>
-        <p>
-            Revisa lo que esta sucediendo a traves de 
-            <a href="{% url 'detections' %}"> tu dispositivo </a>
-        </p>
-        
-    </body>
+</style>
+</head>
 
+<body>
+    <center class="wrapper">
+        <table class="main" width="100%">
 
+            <tr>
+                <td>
+                    <a href="#"><img src="{{imagen}}" alt="" width="600"
+                       style="max-width: 100%;"></a>
+                </td>
+            </tr>
 
+        </table>
+    </center>
+</body>
 </html>
