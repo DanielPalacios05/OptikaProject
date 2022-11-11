@@ -9,6 +9,7 @@ from OptikaWeb.bdconnect import *
 from facialRecog.facialrecognition import *
 from .forms import FileFormset,PersonForm
 from .workers import loadFacesToFirebase
+import base64
 
 
 def home(request):
@@ -146,7 +147,6 @@ def detections(request):
         detections.append(doc_dict)
     return render(request, 'detections.html', {'detections': detections})    
                             
-
 #--------------------------------------------------------------------------------------------------------
 #existe dos formas de mandar informacion al servidor. Post y get.
 #post es para cosas que son secretas, como la password. Porque sino, otras personas podrian verla 
