@@ -9,6 +9,7 @@ from OptikaWeb.bdconnect import *
 from facialRecog.facialrecognition import *
 from .forms import FileFormset,PersonForm
 from .workers import loadFacesToFirebase
+import base64
 
 
 def home(request):
@@ -27,6 +28,11 @@ def peopleToRecog(request):
 def deletePerson(request, id):
      delKnownPerson(id)
      return redirect('/peopleToRecog/')    
+
+def deleteDetections(request):
+     delDetections()
+     return redirect('/detections/')    
+
 
 def mainPage(request):  
     return render(request, 'mainPage.html')
@@ -96,8 +102,8 @@ def send_email(mail, nombre, conocido, imagen):
     email.send() 
 
 def detections(request):
-    detections_ref = db.collection(u'Detections')
-
+    detections_ref = db.collection(u'Detections').order_by(u'datetime', direction=firestore.Query.DESCENDING)
+    
     # Create an Event for notifying main thread.
     delete_done = threading.Event()
     # Create a callback on_snapshot function to capture changes
@@ -146,7 +152,6 @@ def detections(request):
         detections.append(doc_dict)
     return render(request, 'detections.html', {'detections': detections})    
                             
-
 #--------------------------------------------------------------------------------------------------------
 #existe dos formas de mandar informacion al servidor. Post y get.
 #post es para cosas que son secretas, como la password. Porque sino, otras personas podrian verla 

@@ -7,7 +7,7 @@ import cv2
 import datetime
 
 FILE_NAME = "frame.jpg"
-CONNECTION_STRING = "HostName=optika2.azure-devices.net;DeviceId=testdevice;SharedAccessKey=e3LZRp2CrOK+eolM5camvHU+hwEneZ5mlV71DOkJerw="
+CONNECTION_STRING = "HostName=OptikaDevices.azure-devices.net;DeviceId=device;SharedAccessKey=1SIIP0sRqTAvZldMqiHkqcuTxm2Yw1qvy6n93QmhLeQ="
 stor = "DefaultEndpointsProtocol=https;AccountName=optikaimages;AccountKey=nrYz2nK08cwrcAD3m+7OCxk0ZGLALyVJHECVkdGJlpIpvkaQxIw3E/4iO3CxO01plBfdHcv1Mofq+AStcq9kMg==;EndpointSuffix=core.windows.net"
 
 def create_client():
