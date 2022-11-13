@@ -30,7 +30,7 @@
               style="padding: 10px; box-shadow: 0px 4px 5px black; cursor: pointer; display: flex; justify-content: space-between;"
             >
 			  {{ person.id }}
-              <a type="button" class="btn btn-danger" href="{% url 'delete-known-person' person.id %}">Eliminar</a>
+              <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#peopleModal{{ forloop.counter0 }}">Eliminar</button>
             </h3>
             <div class="picturesContainer" style="flex-direction: column;">
 			  <div style="display: flex; flex-wrap: wrap;">
@@ -71,6 +71,25 @@
 				</div>
 			  </div>
 			</div>
+			<!-- Modal dialog START -->
+			<div class="modal fade" id="peopleModal{{ forloop.counter0 }}" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+			  <div class="modal-dialog">
+				<div class="modal-content text-dark">
+				  <div class="modal-header">
+					<h5 class="modal-title" id="exampleModalLabel">Eliminar persona</h5>
+					<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+				  </div>
+				  <div class="modal-body">
+					<a>¿Seguro que quieres eliminar a {{ person.id }}?</a>
+				  </div>
+				  <div class="modal-footer">
+					<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+					<a type="button" href="{% url 'delete-known-person' person.id %}" class="btn btn-danger">Eliminar</a>
+				  </div>
+				</div>
+			  </div>
+			</div>
+			<!-- Modal dialog END -->
 		{% endfor %}
 	  </ul>
 	  {% else %}
