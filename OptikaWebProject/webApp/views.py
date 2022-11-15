@@ -10,6 +10,8 @@ from facialRecog.facialrecognition import *
 from .forms import FileFormset,PersonForm
 from .workers import loadFacesToFirebase
 import base64
+import re
+import unicodedata
 
 
 def home(request):
@@ -23,11 +25,27 @@ def peopleToRecog(request):
         people_dict = person.to_dict()
         people_dict['id'] = person.id
         people_to_recog.append(people_dict)
+
+    if request.method == 'POST':
+        files = request.FILES
+
+        file_key = list(files.keys())[0]
+        uid = file_key[8:]
+        payload = files.getlist(file_key)
+
+        loadFacesToFirebase(payload, uid)
+
+        return redirect('/peopleToRecog')
+
     return render(request, 'peopleToRecog.html', {'people_to_recog': people_to_recog})
 
 def deletePerson(request, id):
      delKnownPerson(id)
      return redirect('/peopleToRecog/')    
+
+def deleteImage(request, name, index):
+      removePersonImage(name,index)
+      return redirect('/peopleToRecog')
 
 def deleteDetections(request):
      delDetections()
@@ -57,14 +75,15 @@ def addPerson(request):
                 if form.is_valid() and form.has_changed():
                     
                     fileList.append(form.cleaned_data["image"])
-          
-        loadFacesToFirebase(fileList,nameform.cleaned_data["name"])
+
+        name = nameform.cleaned_data["name"]
+        name = re.sub("[^\w+]", "_", name)
+        name = "".join(char for char in unicodedata.normalize("NFD", name) 
+                       if unicodedata.category(char) != "Mn")
+
+        loadFacesToFirebase(fileList, name)
             
         return redirect("/")
-
-
-
-
     return render(request, 'addPerson.html',{'nameForm':nameform,'fileForms':fileForm})
 
 def liveCam(request):
