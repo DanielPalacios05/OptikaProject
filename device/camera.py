@@ -10,6 +10,7 @@ FILE_NAME = "frame.jpg"
 CONNECTION_STRING = "HostName=OptikaDevices.azure-devices.net;DeviceId=device;SharedAccessKey=1SIIP0sRqTAvZldMqiHkqcuTxm2Yw1qvy6n93QmhLeQ="
 stor = "DefaultEndpointsProtocol=https;AccountName=optikaimages;AccountKey=nrYz2nK08cwrcAD3m+7OCxk0ZGLALyVJHECVkdGJlpIpvkaQxIw3E/4iO3CxO01plBfdHcv1Mofq+AStcq9kMg==;EndpointSuffix=core.windows.net"
 
+
 def create_client():
     # Instantiate client
     client = IoTHubDeviceClient.create_from_connection_string(CONNECTION_STRING,websockets=True)
@@ -78,14 +79,18 @@ device_client.connect()
 
 
 
+streamingOn = False
 
 while True:
 
-
+    
     readyTosend = device_client.get_twin()["desired"]["readyToSend"]
 
     if readyTosend:
         
+        os.system('sudo killall motion')
+        streamingOn = False
+
         storage_info = device_client.get_storage_info_for_blob(FILE_NAME)
 
         video_capture = cv2.VideoCapture(0)
@@ -117,9 +122,13 @@ while True:
                 storage_info["correlationId"], False, result.status_code, str(result)
             )
         video_capture.release()
+    else:
+
+        if streamingOn == False:
+
+            os.system('sudo motion')
+            streamingOn = True
     
     
 
-    time.sleep(30)
-
-
+    time.sleep(15)
