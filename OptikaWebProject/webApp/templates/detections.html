@@ -28,41 +28,40 @@
           {% if detections %}
           <div  class="d-flex flex-row" style="flex-wrap: wrap;">
             {% for detection in detections %}
-            <div  class="bg-dark"style="display: flex; margin: 10px; 
-												 width: 22rem; 
-												 flex-direction: column;
-												 padding: 10px;
-												 box-shadow: 0px 4px 5px black;
-												 cursor: pointer;
-												 justify-content: space-between;"
-						>
+			  <div  class="bg-dark"style="display: flex; margin: 10px; 
+										  width: 22rem; 
+										  flex-direction: column;
+										  padding: 10px;
+										  box-shadow: 0px 4px 5px black;
+										  cursor: pointer;
+										  justify-content: space-between;"
+			  >
 							
-              <div
-								id={{ detection.id }}
-                class="detection"
-                style="display: flex; margin: 5px; 
-											cursor: pointer;
-											justify-content: space-between;
-										"
-                >
-                <p class="detectionInfo text-secondary" >
-									{% if detection.known %}
-										Se ha detectado a {{ detection.name }} en {{ detection.datetime|timezone:"Etc/GMT+5"}}
-									{% else %}
-										Se ha detectado a una persona desconocida en {{ detection.datetime|timezone:"Etc/GMT+5"}}
-									{% endif %}
-                </p>
-								</div>
-								<img
-									class="img-thumbnail"
+				<div
+				  id={{ detection.id }}
+				  class="detection"
+				  style="display: flex; margin: 5px; 
+						 cursor: pointer;
+						 justify-content: space-between;"
+				  >
+				  <p class="detectionInfo text-secondary" >
+					{% if detection.known %}
+					  Se ha detectado a {{ detection.name }} en {{ detection.datetime|timezone:"Etc/GMT+5"}}
+					{% else %}
+					  Se ha detectado a una persona desconocida en {{ detection.datetime|timezone:"Etc/GMT+5"}}
+					{% endif %}
+				  </p>
+				</div>
+				<img
+				  class="img-thumbnail"
                   src={{ detection.img_url }}
                   alt="Image"
-							/>
-            </div>
-						{% endfor %}
-          </dv>
+				/>
+			  </div>
+			{% endfor %}
+          </div>
           {% else %}
-          <p>No polls are available.</p>
+          <p style="color: white;">No hay detecciones</p>
           {% endif %}
         </div>
 				<div style="padding: 10px;
@@ -92,7 +91,7 @@
 		  </div>
 		  <div class="modal-footer">
 			<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
-			<a type="button" href={% url 'delete-detections' %} class="btn btn-danger">Eliminar</a>
+			<a type="button" href={% url 'delete-detections' %} class="btn btn-danger" >Eliminar</a>
 		  </div>
 		</div>
 	  </div>
