@@ -25,11 +25,11 @@ SECRET_KEY = 'django-insecure-ug8^#ej8d^i)s!=+xfrb!w2(7m^$3*qij$-wvf*-r+zwg)ydbf
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ["optika.azurewebsites.net","0.0.0.0","127.0.0.1"]
+ALLOWED_HOSTS = ["optikaweb.azurewebsites.net","0.0.0.0","127.0.0.1","169.254.130.2"]
 
 CSRF_TRUSTED_ORIGINS = [
     'http://localhost:8000',
-    "https://optika.azurewebsites.net",
+    "https://optikaweb.azurewebsites.net",
 ]
 
 # Application definition
@@ -131,10 +131,10 @@ STATIC_ROOT = BASE_DIR / 'staticfiles'
 # STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 STATICFILES_DIRS = (os.path.join(BASE_DIR, 'static'), )
 
-EMAIL_HOST = 'smtp.googlemail.com'
+EMAIL_HOST = 'smtp.googlemail.com' 
 EMAIL_PORT = 587
 EMAIL_HOST_USER = 'optikaeafit@gmail.com' 
-EMAIL_HOST_PASSWORD = ''
+EMAIL_HOST_PASSWORD = 'rqtqqiuamgipuyba'
 EMAIL_USE_TLS = True
 #-----------------------------------------------------#
 

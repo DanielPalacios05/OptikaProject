@@ -5,10 +5,12 @@ import json
 from azure.storage.blob import BlobClient
 from azure.iot.hub import IoTHubRegistryManager
 from azure.iot.hub.models import Twin, TwinProperties
+from django.template.loader import get_template 
 import os
 from OptikaWeb.bdconnect import *
 import numpy as np
 import cv2
+from django.conf import settings
 
 from .facialrecognition import *
 
@@ -28,10 +30,6 @@ iothub_registry_manager = IoTHubRegistryManager(IOTHUB_CONNECTION_STRING)
 def generateDetectionLog(request):
 
 
-    twin = iothub_registry_manager.get_twin(DEVICE_ID)
-    twin_patch = Twin(properties= TwinProperties(desired={'readyToSend' : False}))
-    
-    twin = iothub_registry_manager.update_twin(DEVICE_ID, twin_patch, twin.etag)
 
     blob = BlobClient.from_connection_string(STORAGE_CONNECTION_STRING,"device-upload",f"{DEVICE_ID}/frame.jpg")
 
@@ -40,31 +38,32 @@ def generateDetectionLog(request):
     binary = blob.download_blob().readall()
 
     frame = cv2.imdecode(np.asarray(bytearray(binary), dtype="uint8"), cv2.IMREAD_COLOR)
-
-
-
-
     
 
     detection = detect(frame)
 
     if detection:
 
-        sendDetectionLog(cv2.imencode('.jpg',detection[0])[1].tobytes(),",".join(detection[1]),modified)
+        try:
 
 
-    twin = iothub_registry_manager.get_twin(DEVICE_ID)
-    twin_patch = Twin(properties= TwinProperties(desired={'readyToSend' : True}))
-    twin = iothub_registry_manager.update_twin(DEVICE_ID, twin_patch, twin.etag)
+            link,name = sendDetectionLog(cv2.imencode('.jpg',detection[0])[1].tobytes(),",".join(detection[1]),modified)
 
-    return JsonResponse({'status_code':20})
+            context = {'mail': settings.EMAIL_HOST_USER, 'name': name, 'imagen': link}
+    
+            print(context)
+            template = get_template('correoB.html')
+            content = template.render(context)
 
-def loadPeopleToRecog(request):
 
-    """This function will happen everytime"""
 
-    loadPeople(getPeople())
+            send_email(settings.EMAIL_HOST_USER,name,content)
 
-    return redirect("/")
 
+
+        except:
+            return JsonResponse({u'status_code':500})
+
+
+    return JsonResponse({'status_code':200})
 

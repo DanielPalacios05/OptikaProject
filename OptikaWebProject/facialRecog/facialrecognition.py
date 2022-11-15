@@ -158,7 +158,7 @@ def classifyFace(frame):
 
     for doc in docs:
 
-        print(doc.id)
+        
 
         for personImage in doc.get('images'):
 
@@ -167,7 +167,7 @@ def classifyFace(frame):
             if is_match(pickle.loads(personImage['embedding']).flatten(), subjectEmbedding.flatten()):
                 matchFound = True
 
-                return doc.id
+                return doc.get('name')
 
     if not matchFound:
         return "Desconocido"
