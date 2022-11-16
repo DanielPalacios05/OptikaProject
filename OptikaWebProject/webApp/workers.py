@@ -1,14 +1,17 @@
 import cv2
 import numpy as np
-from OptikaWeb.bdconnect import uploadPersonImage
+from OptikaWeb.bdconnect import uploadPersonImage,appendFaceToPerson,db
 from facialRecog.facialrecognition import getEmbedding
 import pickle
 
 
+
 def loadFacesToFirebase(files,name,append):
 
-    for file in files:
 
+    document = db.collection(u"KnownPeople").document()
+
+    for file in files:
 
         downloadedFile = b""
 
@@ -22,7 +25,10 @@ def loadFacesToFirebase(files,name,append):
 
         embedding = pickle.dumps(getEmbedding(fileImage,extractFace = True))
 
-        uploadPersonImage(name,downloadedFile,embedding,append)
+        if append:
+            appendFaceToPerson(name,downloadedFile,embedding)
+        else:
+            uploadPersonImage(name,downloadedFile,embedding,document)
 
 
 

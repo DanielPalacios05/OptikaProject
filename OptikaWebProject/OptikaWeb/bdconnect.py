@@ -145,12 +145,16 @@ def delDetections():
         #blob.delete()
         doc.delete()
 
-def uploadPersonImage(personId,image,embedding,append):
 
+
+
+
+def appendFaceToPerson(name,image,embedding):
+        
     filename = str(uuid.uuid4())
 
 
-    blob = upload_blob(f"KnownPeople/{personId}/{filename}.jpg", image)
+    blob = upload_blob(f"KnownPeople/{name}/{filename}.jpg", image)
 
     blob.make_public()
 
@@ -159,16 +163,32 @@ def uploadPersonImage(personId,image,embedding,append):
 
     imageObj = {"image":blobLink,"embedding":embedding}
 
-    if append:
 
-        db.collection(u'KnownPeople').document(personId).update({
+    db.collection(u'KnownPeople').document(name).update({
             u'images': firestore.ArrayUnion([imageObj])
-        })
-    else:
+    })
 
-        db.collection(u'KnownPeople').document().set({
-                u'name':personId,
+
+
+def uploadPersonImage(name,image,embedding,document):
+
+    filename = str(uuid.uuid4())
+
+
+    blob = upload_blob(f"KnownPeople/{name}/{filename}.jpg", image)
+
+    blob.make_public()
+
+    blobLink = blob.public_url
+
+
+    imageObj = {"image":blobLink,"embedding":embedding}
+
+
+    document.set({
+                u'name':name,
                 u'images': firestore.ArrayUnion([imageObj])},merge=True)
+
 
 
 
