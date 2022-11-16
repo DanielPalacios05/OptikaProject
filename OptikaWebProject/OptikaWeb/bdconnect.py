@@ -1,4 +1,5 @@
 from datetime import datetime,timezone
+from numpy import imag
 import pytz
 import firebase_admin
 from firebase_admin import credentials
@@ -138,14 +139,18 @@ def delDetections():
     docs = detections_ref.list_documents()    
     for doc in docs:
         print(f'Deleting doc {doc.id} => {doc.get().to_dict()}')
+        #doc_dict = doc.to_dict()
+        #image_path = doc_dict['img_url'][56:]
+        #blob = bucket.blob(img_url)
+        #blob.delete()
         doc.delete()
 
-def uploadPersonImage(personName,image,embedding):
+def uploadPersonImage(personId,image,embedding,append):
 
     filename = str(uuid.uuid4())
 
 
-    blob = upload_blob(f"KnownPeople/{personName}/{filename}.jpg", image)
+    blob = upload_blob(f"KnownPeople/{personId}/{filename}.jpg", image)
 
     blob.make_public()
 
@@ -154,26 +159,35 @@ def uploadPersonImage(personName,image,embedding):
 
     imageObj = {"image":blobLink,"embedding":embedding}
 
-    doc_ref = db.collection(u'KnownPeople').document().set({
-            u'name':personName,
-            u'images': firestore.ArrayUnion([imageObj])},merge=True)
-            
+    if append:
+
+        db.collection(u'KnownPeople').document(personId).update({
+            u'images': firestore.ArrayUnion([imageObj])
+        })
+    else:
+
+        db.collection(u'KnownPeople').document().set({
+                u'name':personId,
+                u'images': firestore.ArrayUnion([imageObj])},merge=True)
+
+
+
+
+
+
+
+def removePersonImage(personName,index: int):
+
+    doc_ref = db.collection(u'KnownPeople').document(personName) 
+
+    doc = doc_ref.get()
+
+    images_array = doc.to_dict()['images']
+    image = images_array[index]
+    image_path = image['image'][56:]
     
-    
+    doc_ref.update({u'images': firestore.ArrayRemove([image])})
 
+    blob = bucket.blob(image_path)
 
-
-
-
-
-            
-
-
-
-
-
-
-
-
-
-
+    blob.delete()

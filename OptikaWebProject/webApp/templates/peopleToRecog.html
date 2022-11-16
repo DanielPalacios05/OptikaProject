@@ -1,81 +1,148 @@
 <html>
-    <head>
-        <title>Personas a reconocer</title>
-        {% load static %}
-        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-iYQeCzEYFbKjA/T2uDLTpkwGzCiq6soy8tYaI1GyVh/UjpbCx/TYkiZhlZB6+fzT" crossorigin="anonymous">
-        <script src="{% static 'popup.js' %}"></script>
-        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
-    </head>
-    <body class="bg-dark text-white">
-        <a href="{% url 'mainPage' %}" class="btn btn-primary" style="margin-left: 25px; margin-bottom: 25px">Home</a>
-        <div class="people_">
-            {% if people_to_recog %}
-                <ul id="people-container" style="list-style-type: none">
-                    {% for person in people_to_recog %}
-                        <div id="personNumber{{ forloop.counter0 }}" class="person" style="display: flex; margin: 10px; flex-direction: column;">
-                            <h3 class="userInfo" style="padding: 10px; box-shadow: 0px 4px 5px black; cursor: pointer; display: flex; justify-content: space-between;">
-                                {{ person.name }}
-                                <a type="button" class="btn btn-danger" href="{% url 'delete-known-person' person.id %}">Eliminar</a>
-                            </h3>
-                            <div class="picturesContainer" style="flex-direction: column;">
-                                <div style="display: flex; flex-wrap: wrap;">
-                                    {% for image in person.images %}
-                                        <div style="position: relative;">
-                                            <img src={{ image.image }} alt="Image" class="img-thumbnail" style="width: 250px; box-shadow: 0px 4px 5px black; margin: 10px;"/>
-                                            <a href="{% url 'deletePersonImage' person.id forloop.counter0 %}" type="button" style="position: absolute; top: 0px; right: 0px; font-weight: bold; transform: translate(-20px, 20px)" class="btn btn-danger" onclick="">x</a>
-                                        </div>
-                                    {% endfor %}
-                                    <div class="img-thumbnail" style="width: 250px; height: 80%; box-shadow: 0px 4px 5px black; margin: 10px; padding: 20px 20px 20px 20px; display: flex; justify-content: center; flex-direction: column">
-                                        <label for="picture" class="text-dark" style="font-weight: bold; font-size: 20px;">
-                                            Imagen:
-                                        </label>
-                                        <form action="{% url 'addPersonImage' person.id forloop.counter0 %}">
-                                            <input id="file-input" type="file" class="form-control pictureInput" name="picture" onchange="confirmUpload()"/>
-                                            <div class="modal fade text-dark" id="modal-delete" tabindex="-1" role="dialog" aria-hidden="true">
-                                                <div class="modal-dialog" role="document">
-                                                    <div class="modal-content">
-                                                        <div class="modal-header">
-                                                            <h5 class="modal-title text-dark">Eliminar imagen de {{person.name}}</h5>
-                                                            <button type="" class="close" data-bs-dismiss="modal" aria-label="Close">
-                                                                <span aria-hidden="true" class="text-dark">&times;</span>
-                                                            </button>
-                                                        </div>
-                                    
-                                                        <div class="modal-body" id="modal-body">
-                                                            <p>¿Seguro que quieres elimanar esta image?</p>
-                                                        </div>
-                                    
-                                                        <div class="modal-footer" id="modal-footer">
-                                                            <button type="button" class="btn btn-danger" data-bs-dismiss="modal" onclick="document.value=''">
-                                                                Cancelar
-                                                            </button>
-                                                            <button type="submit" class="btn btn-success" id="confirm-delete-btn">
-                                                                Confirmar
-                                                            </button>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </form>
-                                    </div>
-                                    <div id="uploadStatus${person.id}" class="text-white" style="margin: 0px 0px 0px 20px;"></div>
-                                </div>
-                            </div>
-                        </div>
-                    {% endfor %}
-                </ul>
-            {% else %}
-                <p>No people available</p>
-            {% endif %}
-        </div>
-        <a href="{% url 'addPerson' %}" class="btn btn-primary" style="margin-left: 25px">Añadir persona</a>
+  <head>
+    <title>PeopleToRecog</title>
+	{% load static %}
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.1/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+      integrity="sha384-iYQeCzEYFbKjA/T2uDLTpkwGzCiq6soy8tYaI1GyVh/UjpbCx/TYkiZhlZB6+fzT"
+      crossorigin="anonymous"
+    />
+  </head>
+  <body class="bg-dark text-white">
+    <a
+      href="{% url 'mainPage' %}"
+      class="btn btn-primary"
+      style="margin-left: 25px; margin-bottom: 25px"
+      >Home</a
+    >
+	<div class="people_">
+	  {% if people_to_recog %}
+	  <ul id="people-container" style="list-style-type: none">
+		{% for person in people_to_recog %} 
+		  <div
+			id="personNumber{{ forloop.counter0 }}"
+            class="person"
+            style="display: flex; margin: 10px; flex-direction: column;"
+          >
+            <h3
+			  class="userInfo"
+              style="padding: 10px; box-shadow: 0px 4px 5px black; cursor: pointer; display: flex; justify-content: space-between;"
+			  onclick="toggle(event)"
+            >
+			  {{ person.name }}
+              <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#peopleModal{{ forloop.counter0 }}">Eliminar</button>
+            </h3>
+            <div class="picturesContainer" style="flex-direction: column;">
+			  <div style="display: none; flex-wrap: wrap;">
+				  {% for image in person.images %}
+					<div style="position: relative;">
+					  <img
+						  src={{ image.image }}
+						  alt="Image"
+						  class="img-thumbnail"
+						  style="width: 250px; box-shadow: 0px 4px 5px black; margin: 10px;"
+					  />
+					  <a type="button" style="position: absolute; top: 0px; right: 0px; font-weight: bold; transform: translate(-20px, 20px)" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#imageModal_{{ person.id }}_{{ forloop.counter0 }}">x</a>
+					</div>
+					<!-- Modal dialog START -->
+					<div class="modal fade" id="imageModal_{{ person.id }}_{{ forloop.counter0 }}" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+					  <div class="modal-dialog">
+						<div class="modal-content text-dark">
+						  <div class="modal-header">
+							<h5 class="modal-title" id="exampleModalLabel">Eliminar imagen</h5>
+							<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+						  </div>
+						  <div class="modal-body">
+							<a>¿Seguro que quieres eliminar esta imagen?</a>
+						  </div>
+						  <div class="modal-footer">
+							<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+							<a type="button" href={% url 'delete-image' person.id forloop.counter0 %} class="btn btn-danger">Eliminar</a>
+						  </div>
+						</div>
+					  </div>
+					</div>
+					<!-- Modal dialog END -->
+				  {% endfor %}
+				  <form method="post" enctype="multipart/form-data" style="display: flex;align-items: center;justify-content: center;flex-direction: column;">
+					{% csrf_token %}
+					<div
+					  class="img-thumbnail"
+					  style="width: 250px; height: 80%; box-shadow: 0px 4px 5px black; margin: 10px; padding: 20px 20px 20px 20px; display: flex; justify-content: center; flex-direction: column"
+					>
+					<label
+					  for="picture"
+					  class="text-dark"
+					  style="font-weight: bold; font-size: 20px;"
+					>
+					  Imagen:
+					</label>
+					<input
+					  id="image-input-{{ person.id}}"
+					  type="file"
+					  class="form-control pictureInput"
+					  name="picture-{{ person.id}}"
+					  required
+					  multiple
+					/>
+					</div>
+					<button class="btn btn-success my-4" type="submit">Submit</button>
+				  </form>
+				</div>
+			  </div>
+			</div>
+			<!-- Modal dialog START -->
+			<div class="modal fade" id="peopleModal{{ forloop.counter0 }}" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+			  <div class="modal-dialog">
+				<div class="modal-content text-dark">
+				  <div class="modal-header">
+					<h5 class="modal-title" id="exampleModalLabel">Eliminar persona</h5>
+					<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+				  </div>
+				  <div class="modal-body">
+					<a>¿Seguro que quieres eliminar a {{ person.name }}?</a>
+				  </div>
+				  <div class="modal-footer">
+					<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+					<a type="button" href="{% url 'delete-known-person' person.id %}" class="btn btn-danger">Eliminar</a>
+				  </div>
+				</div>
+			  </div>
+			</div>
+			<!-- Modal dialog END -->
+		{% endfor %}
+	  </ul>
+	  {% else %}
+	  <p>No people available</p>
+	  {% endif %}
+	</div>
+    <a
+      href="{% url 'addPerson' %}"
+      class="btn btn-primary"
+      style="margin-left: 25px"
+      >Añadir persona</a
+    >
 
+	<script>
+	  function toggle(e) {
+		let title = e.target
+		let person = title.parentElement
+		let picturesContainer = person.getElementsByClassName('picturesContainer')[0].getElementsByTagName('div')[0]
+		console.log(picturesContainer)
+		let currentCss = picturesContainer.style.cssText;
+        let currentDisplayStyle = currentCss.match(/none|flex/)[0];
 
-        <!-- Modal dialog START -->
-     
-        <!-- Modal dialog END -->
-
-
-
-    </body>
+        picturesContainer.style.cssText =
+          currentDisplayStyle === "flex"
+            ? currentCss.replace(currentDisplayStyle, "none")
+            : currentCss.replace(currentDisplayStyle, "flex");
+	  }
+	</script>
+    <script
+      src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.1/dist/js/bootstrap.bundle.min.js"
+      integrity="sha384-u1OknCvxWvY5kfmNBILK2hRnQC3Pr17a+RTT6rIHI7NnikvbZlHgTPOOmMi466C8"
+      crossorigin="anonymous"
+    ></script>
+  </body>
 </html>

@@ -31,6 +31,6 @@ urlpatterns = [
     path('api/',include(facialRecogUrls)),
     path('deleteKnown/<slug:id>', optViews.deletePerson, name="delete-known-person"),
     path('deleteDetections/', optViews.deleteDetections, name="delete-detections"),
-    path('deletePersonImage/<str:id>/<int:index>',optViews.deletePersonImage,name="deletePersonImage"),
+    path('deletePersonImage/<str:id>/<int:index>',optViews.deletePersonImage,name="delete-image"),
     path('addPersonImage/<str:id>/<int:index>',optViews.addPersonImage,name="addPersonImage"),
 ]

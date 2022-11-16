@@ -11,7 +11,6 @@ from .forms import FileFormset,PersonForm
 from .workers import loadFacesToFirebase
 from azure.iot.hub import IoTHubRegistryManager
 from azure.iot.hub.models import Twin, TwinProperties
-import base64
 
 IOTHUB_CONNECTION_STRING = os.environ.get("DEVICE_CONN")
 
@@ -33,11 +32,28 @@ def peopleToRecog(request):
         people_dict = person.to_dict()
         people_dict["id"] = person.id
         people_to_recog.append(people_dict)
+
+    if request.method == 'POST':
+        files = request.FILES
+
+        file_key = list(files.keys())[0]
+        print(file_key)
+        uid = file_key[8:]
+        payload = files.getlist(file_key)
+
+        loadFacesToFirebase(payload, uid,True)
+
+        return redirect('/peopleToRecog')
+
     return render(request, 'peopleToRecog.html', {'people_to_recog': people_to_recog})
 
 def deletePerson(request, id):
      delKnownPerson(id)
      return redirect('/peopleToRecog/')    
+
+def deleteImage(request, name, index):
+      removePersonImage(name,index)
+      return redirect('/peopleToRecog')
 
 def deleteDetections(request):
      delDetections()
@@ -45,26 +61,7 @@ def deleteDetections(request):
 
 def deletePersonImage(request,id,index):
 
-    doc = db.collection(u'KnownPeople').document(id)
-
-    docDict = doc.get().to_dict()
-
-    link = docDict["images"][index]["image"]
-
-    name = "/".join(link.split("/")[4:])
-
-    blobRef = bucket.blob(name)
-
-    blobRef.delete()
-
-    imgList = docDict["images"]
-
-    imgList.pop()
-
-    doc.update({
-        u"images":imgList
-    })
-
+    removePersonImage(id,index)
 
     return redirect("/peopleToRecog")
 
@@ -94,8 +91,10 @@ def addPerson(request):
                 if form.is_valid() and form.has_changed():
                     
                     fileList.append(form.cleaned_data["image"])
-          
-        loadFacesToFirebase(fileList,nameform.cleaned_data["name"])
+
+            name = nameform.cleaned_data["name"]
+
+            loadFacesToFirebase(fileList, name,False)
             
         return redirect("/peopleToRecog")
         

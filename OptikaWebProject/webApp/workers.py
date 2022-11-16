@@ -5,7 +5,7 @@ from facialRecog.facialrecognition import getEmbedding
 import pickle
 
 
-def loadFacesToFirebase(files,name):
+def loadFacesToFirebase(files,name,append):
 
     for file in files:
 
@@ -22,7 +22,7 @@ def loadFacesToFirebase(files,name):
 
         embedding = pickle.dumps(getEmbedding(fileImage,extractFace = True))
 
-        uploadPersonImage(name,downloadedFile,embedding)
+        uploadPersonImage(name,downloadedFile,embedding,append)
 
 
 
