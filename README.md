@@ -1,3 +1,6 @@
+<h3 align="left">ㅤ</h3> <!-- aquí hay un icono invisible para el espacio -->
+<h3 align="left">ㅤ</h3> <!-- aquí hay un icono invisible para el espacio -->
+
 <p align="center"> 
     <img width="400" src="https://i.imgur.com/BWYIfMp.png">
 </p>
