@@ -134,7 +134,7 @@ STATICFILES_DIRS = (os.path.join(BASE_DIR, 'static'), )
 EMAIL_HOST = 'smtp.googlemail.com' 
 EMAIL_PORT = 587
 EMAIL_HOST_USER = 'optikaeafit@gmail.com' 
-EMAIL_HOST_PASSWORD = 'rqtqqiuamgipuyba'
+EMAIL_HOST_PASSWORD = ''
 EMAIL_USE_TLS = True
 #-----------------------------------------------------#
 
