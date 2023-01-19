@@ -1,10 +1,11 @@
 import os
 import time
+import cv2
+import datetime
 from azure.iot.device import IoTHubDeviceClient
 from azure.core.exceptions import AzureError
 from azure.storage.blob import BlobClient
-import cv2
-import datetime
+
 
 FILE_NAME = "frame.jpg"
 CONNECTION_STRING = "HostName=OptikaDevices.azure-devices.net;DeviceId=device;SharedAccessKey=1SIIP0sRqTAvZldMqiHkqcuTxm2Yw1qvy6n93QmhLeQ="
@@ -25,11 +26,9 @@ def create_client():
     except:
         # Clean up in the event of failure
         client.shutdown()
-
     return client
 
 def store_blob(blob_info, file_name,blob):
-
 
     try:
         sas_url = "https://{}/{}/{}{}".format(
@@ -50,7 +49,6 @@ def store_blob(blob_info, file_name,blob):
         # catch file not found and add an HTTP status code to return in notification to IoT Hub
         ex.status_code = 404
         return (False, ex)
-
     except AzureError as ex:
         # catch Azure errors that might result from the upload operation
         return (False, ex)
@@ -66,60 +64,43 @@ def setCooldown(client):
     except:
         print("something wrong happened")
 
-
 device_client = create_client()
 
 # Connect the client
 device_client.connect()
 
 
-
 #send camera data to azure whenever q is pressed
 
-
-
-
 while True:
-
 
     readyTosend = device_client.get_twin()["desired"]["readyToSend"]
 
     if readyTosend:
         
         storage_info = device_client.get_storage_info_for_blob(FILE_NAME)
-
         video_capture = cv2.VideoCapture(0)
-
         ret, frame = video_capture.read()
-
         blobImage = cv2.imencode(".jpg",frame)[1].tobytes()
-
         success, result = store_blob(storage_info,FILE_NAME,blobImage)
 
         if success == True:
             print("Upload succeeded. Result is: \n") 
             print(result)
-            print()
 
             device_client.notify_blob_upload_status(
                 storage_info["correlationId"], True, 200, "OK: {}".format(FILE_NAME)
             )
-
             setCooldown(device_client)
 
         else :
             # If the upload was not successful, the result is the exception object
             print("Upload failed. Exception is: \n") 
             print(result)
-            print()
 
             device_client.notify_blob_upload_status(
                 storage_info["correlationId"], False, result.status_code, str(result)
             )
         video_capture.release()
     
-    
-
     time.sleep(30)
-
-

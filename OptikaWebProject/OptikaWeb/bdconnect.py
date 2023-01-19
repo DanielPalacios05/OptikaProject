@@ -1,3 +1,6 @@
+from PIL import Image
+from django.conf import settings
+from django.core.mail import EmailMultiAlternatives
 from datetime import datetime,timezone
 from numpy import imag
 import pytz
@@ -7,12 +10,8 @@ from firebase_admin import  storage
 from firebase_admin import firestore
 import requests
 import uuid
-from PIL import Image
-from django.conf import settings
-from django.core.mail import EmailMultiAlternatives
-
-
 import cv2
+
 
 cred = credentials.Certificate("optika-6e7bd-firebase-adminsdk-1c4j0-66656df18f.json")
 
@@ -22,12 +21,10 @@ app = firebase_admin.initialize_app(cred, {
 
 
 bucket = storage.bucket()
-
 db = firestore.client()
 
 def send_email(mail, nombre,content):
     
-
     if(nombre != "Desconocido"):
         print("voy a mandar un correo de conocido")
 
@@ -51,19 +48,13 @@ def send_email(mail, nombre,content):
    
     email.send() 
 
-
-
 def sendDetectionLog(image,name,date):
 
     my_datetime=date.astimezone(pytz.timezone('Etc/GMT+5'))
-
     my_datetime_str =  my_datetime.strftime('%Y-%m-%d-%H:%M:%S-')
 
-
     blobname = name+my_datetime_str+".jpg"
-
     blob = upload_blob(f"DetectionLog/user1/{blobname}", image)
-
     blobLink = blob.public_url
 
     doc_ref = db.collection(u'Detections').add({
@@ -74,7 +65,6 @@ def sendDetectionLog(image,name,date):
         })
 
     return blobLink, name
-
 
         #must create a entry in firebase storage Detections collection with 
         #image_url: url of image in firebase storage
@@ -93,11 +83,9 @@ def upload_blob(destination_blob_name,contents):
 
         blob = bucket.blob(destination_blob_name)
         blob.upload_from_string(contents, content_type='image/jpeg',timeout=6000)
-
         return blob
 
 def getDetections():
-        
         detections_ref = db.collection(u'Detections')
         docs = detections_ref.stream()
         detections = []
@@ -111,7 +99,6 @@ def getDetections():
 def getPeople():
 
         people = []
-
         knownPeople = db.collection(u'KnownPeople').stream()
 
         for person in knownPeople:
@@ -119,18 +106,14 @@ def getPeople():
             p = person.to_dict()
 
             for i in range(len(p["images"])):
-
                 response = Image.open(requests.get(p["images"][i], stream = True).raw)
-
                 p["images"][i] = response
-
             people.append(p)
         
         return people
 
 def delKnownPerson(person_id):
     db.collection(u'KnownPeople').document(person_id).delete()
-
 
 #Puede ser resumido a elimiar la coleccion
 
@@ -152,17 +135,11 @@ def delDetections():
 def appendFaceToPerson(name,image,embedding):
         
     filename = str(uuid.uuid4())
-
-
     blob = upload_blob(f"KnownPeople/{name}/{filename}.jpg", image)
-
     blob.make_public()
-
     blobLink = blob.public_url
 
-
     imageObj = {"image":blobLink,"embedding":embedding}
-
 
     db.collection(u'KnownPeople').document(name).update({
             u'images': firestore.ArrayUnion([imageObj])
@@ -173,35 +150,21 @@ def appendFaceToPerson(name,image,embedding):
 def uploadPersonImage(name,image,embedding,document):
 
     filename = str(uuid.uuid4())
-
-
     blob = upload_blob(f"KnownPeople/{name}/{filename}.jpg", image)
-
     blob.make_public()
-
     blobLink = blob.public_url
 
-
     imageObj = {"image":blobLink,"embedding":embedding}
-
 
     document.set({
                 u'name':name,
                 u'images': firestore.ArrayUnion([imageObj])},merge=True)
 
 
-
-
-
-
-
-
 def removePersonImage(personName,index: int):
 
     doc_ref = db.collection(u'KnownPeople').document(personName) 
-
     doc = doc_ref.get()
-
     images_array = doc.to_dict()['images']
     image = images_array[index]
     image_path = image['image'][56:]
@@ -209,5 +172,4 @@ def removePersonImage(personName,index: int):
     doc_ref.update({u'images': firestore.ArrayRemove([image])})
 
     blob = bucket.blob(image_path)
-
     blob.delete()

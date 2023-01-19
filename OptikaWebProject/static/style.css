@@ -11,7 +11,6 @@
     background-position: center;
     background-size: cover;
     position: relative;
-
 }
 nav{
     display: flex;
@@ -174,9 +173,7 @@ h3{
     }
 }
 
-
 /* call to action */
-
 .cta{
     margin: 100px auto;
     margin-bottom: 40px;
@@ -203,7 +200,6 @@ h3{
 }
 
 /* footer */
-
 .footer{
     width: 100%;
     text-align: center;

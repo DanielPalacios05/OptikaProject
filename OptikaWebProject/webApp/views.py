@@ -13,11 +13,8 @@ from azure.iot.hub import IoTHubRegistryManager
 from azure.iot.hub.models import Twin, TwinProperties
 
 IOTHUB_CONNECTION_STRING = os.environ.get("DEVICE_CONN")
-
 DEVICE_ID = os.environ.get("DEVICE_ID")
-
 iothub_registry_manager = IoTHubRegistryManager(IOTHUB_CONNECTION_STRING)
-
 
 
 def home(request):
@@ -35,7 +32,6 @@ def peopleToRecog(request):
 
     if request.method == 'POST':
         files = request.FILES
-
         file_key = list(files.keys())[0]
         print(file_key)
         uid = file_key[8:]
@@ -48,31 +44,25 @@ def peopleToRecog(request):
     return render(request, 'peopleToRecog.html', {'people_to_recog': people_to_recog})
 
 def deletePerson(request, id):
-     delKnownPerson(id)
-     return redirect('/peopleToRecog/')    
+    delKnownPerson(id)
+    return redirect('/peopleToRecog/')    
 
 def deleteImage(request, name, index):
-      removePersonImage(name,index)
-      return redirect('/peopleToRecog')
+    removePersonImage(name,index)
+    return redirect('/peopleToRecog')
 
 def deleteDetections(request):
-     delDetections()
-     return redirect('/detections/')
+    delDetections()
+    return redirect('/detections/')
 
 def deletePersonImage(request,id,index):
-
     removePersonImage(id,index)
-
     return redirect("/peopleToRecog")
-
-
-
 
 def mainPage(request):  
     return render(request, 'mainPage.html')
 
 def addPerson(request):
-
     if request.method == 'GET':
         nameform = PersonForm()
         fileForm = FileFormset()
@@ -80,67 +70,43 @@ def addPerson(request):
         
         nameform = PersonForm(request.POST)
         fileForms = FileFormset(request.POST,request.FILES)
-
         fileList = []
 
-
         if nameform.is_valid():
-
             for form in fileForms:
-
                 if form.is_valid() and form.has_changed():
                     
                     fileList.append(form.cleaned_data["image"])
 
             name = nameform.cleaned_data["name"]
-
             loadFacesToFirebase(fileList, name,False)
-            
         return redirect("/peopleToRecog")
-        
     return render(request, 'addPerson.html',{'nameForm':nameform,'fileForms':fileForm})
 
 
 def addPersonImage(request,name,id):
-
     return redirect("/peopleToRecog")
 
 def liveCam(request):
-
     twin = iothub_registry_manager.get_twin(DEVICE_ID)
     twin_patch = Twin(properties= TwinProperties(desired={'readyToSend' : False}))
-    
     twin = iothub_registry_manager.update_twin(DEVICE_ID, twin_patch, twin.etag)
-
 
     return render(request, 'liveCam.html')
 
 
 
 def exitLive(request):
-
-    
-
     twin = iothub_registry_manager.get_twin(DEVICE_ID)
     twin_patch = Twin(properties= TwinProperties(desired={'readyToSend' : True}))
-    
     twin = iothub_registry_manager.update_twin(DEVICE_ID, twin_patch, twin.etag)
-
-    
     return redirect("/mainPage")
 
 
-
-
-
 #funcion para enviar el correo
-
-
 def detections(request):
     detections_ref = db.collection(u'Detections').order_by(u'datetime', direction=firestore.Query.DESCENDING)
     
-
-
     col_query = db.collection(u'Detections')
     # Watch the collection query
     docs = detections_ref.stream() 
@@ -153,7 +119,3 @@ def detections(request):
     return render(request, 'detections.html', {'detections': detections})    
                             
 #--------------------------------------------------------------------------------------------------------
-#existe dos formas de mandar informacion al servidor. Post y get.
-#post es para cosas que son secretas, como la password. Porque sino, otras personas podrian verla 
-
-#el get se hace para recibir informacion

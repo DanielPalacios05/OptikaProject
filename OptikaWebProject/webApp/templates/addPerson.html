@@ -5,8 +5,6 @@
     </head>
     <body>
 
-
-
         <div class="container">
             <div class="row">
                 <div class="col-md-12">
@@ -58,21 +56,16 @@
 
         inputs[0].addEventListener('change',addNewInput)
         
-
         function addNewInput() {
 
             let inputSize = inputs.length-1
             let formRegex = RegExp(`form-(\\d){1}-`,'g')
         
-
             if (inputSize >= 9)
 
                 return alert("No se permite subir mas de 10 imagenes a la vez.");
             
-
             inputs[inputSize].removeEventListener('change',addNewInput)
-
-
 
             inputSize++
 
