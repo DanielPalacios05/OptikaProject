@@ -3,14 +3,15 @@ from django.conf import settings
 from django.core.mail import EmailMultiAlternatives
 from datetime import datetime,timezone
 from numpy import imag
+import requests
+import uuid
+import cv2
 import pytz
 import firebase_admin
 from firebase_admin import credentials
 from firebase_admin import  storage
 from firebase_admin import firestore
-import requests
-import uuid
-import cv2
+
 
 
 cred = credentials.Certificate("optika-6e7bd-firebase-adminsdk-1c4j0-66656df18f.json")

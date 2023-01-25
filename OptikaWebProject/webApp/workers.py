@@ -1,8 +1,8 @@
 import cv2
 import numpy as np
+import pickle
 from OptikaWeb.bdconnect import uploadPersonImage,appendFaceToPerson,db
 from facialRecog.facialrecognition import getEmbedding
-import pickle
 
 def loadFacesToFirebase(files,name,append):
 

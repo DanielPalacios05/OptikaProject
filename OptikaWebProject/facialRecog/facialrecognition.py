@@ -12,7 +12,6 @@ from facenet_pytorch import MTCNN, extract_face
 from OptikaWeb.bdconnect import *
 
 
-
 knownPeople = {}  # {name: [embeddings]}
 torchdevice = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
@@ -23,25 +22,19 @@ model = VGGFace(model='resnet50', include_top=False, input_shape=(240, 240, 3), 
 def jpgFromBlob(blob):
     # cv2.imencode(".jpg",frame)[1].tobytes()
     frame = cv2.imdecode(blob)
-    
     return frame
 
 def detect(frame):
-
 # 0 is used for grayscale image
-
     boxes, probs = cascade.detect(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB))
-
     detectedPeople = []
 
     if boxes is not None:
         filterProbs = probs > 0.90
-
         boxes = boxes[filterProbs]
 
         for (x, y, w, h) in boxes:
             face = extract_face(frame, (x, y, w, h), image_size=240).permute(1, 2, 0).int().numpy()
-
             name = classifyFace(face)
 
             if name == "Desconocido":
@@ -57,7 +50,6 @@ def detect(frame):
                               color,
                               3)
         return frame, detectedPeople
-
     return None
 
 def getEmbedding(frame=None, imagePath=None, extractFace=False):
@@ -82,12 +74,9 @@ def getEmbedding(frame=None, imagePath=None, extractFace=False):
 
             if isinstance(face, list):
                 raise Exception(f"Image should have only a face {len(face)} found")
-
             if face is None:
                 return None
-
             img = face.permute(1, 2, 0).int().numpy()
-
         face = np.asarray(img)
 
         sample = [np.asarray(face, 'float32')]
@@ -103,11 +92,11 @@ def loadPeople(peopleData):
         for person in peopleData:
             if person["images"] != []:
                 embeddings = loadEmbeddings(person["images"])
-
                 if embeddings != []:
                     knownPeople[person["name"]] = embeddings
 
-    # Si no detecta una cara omite getEmbedding
+    #If face in not detected skip getEmbedding 
+
 
 def loadEmbeddings(images):
 
@@ -115,12 +104,10 @@ def loadEmbeddings(images):
         for image in images:
 
             frame = Image.open(requests.get(image, stream=True).raw)
-
             embedding = getEmbedding(frame=frame, extractFace=True)
 
             if embedding is not None:
                 embeddings.append(embedding)
-
         return embeddings
 
 def is_match(ID_embedding, subject_embedding, thresh=0.3):
@@ -140,9 +127,7 @@ def classifyFace(frame):
     docs = db.collection(u'KnownPeople').stream()
 
     for doc in docs:
-
         for personImage in doc.get('images'):
-
             if is_match(pickle.loads(personImage['embedding']).flatten(), subjectEmbedding.flatten()):
                 matchFound = True
                 return doc.get('name')
@@ -153,7 +138,6 @@ def classifyFace(frame):
 def checkFaces(testingDir):
 
         if os.path.isdir(testingDir):
-
             for image in os.listdir(testingDir):
                 imagePath = testingDir + "/" + image
                 classifyFace(imagePath)

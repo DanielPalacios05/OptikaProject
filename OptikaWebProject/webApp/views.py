@@ -21,7 +21,6 @@ def home(request):
     return render(request, 'home.html')
 
 def peopleToRecog(request):
-
     people_ref = db.collection(u'KnownPeople')
     people = people_ref.stream()
     people_to_recog = []
@@ -94,14 +93,11 @@ def liveCam(request):
 
     return render(request, 'liveCam.html')
 
-
-
 def exitLive(request):
     twin = iothub_registry_manager.get_twin(DEVICE_ID)
     twin_patch = Twin(properties= TwinProperties(desired={'readyToSend' : True}))
     twin = iothub_registry_manager.update_twin(DEVICE_ID, twin_patch, twin.etag)
     return redirect("/mainPage")
-
 
 #funcion para enviar el correo
 def detections(request):
