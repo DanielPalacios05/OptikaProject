@@ -46,7 +46,7 @@ nav img{
     background-color: #f44336;
     display: block;
     margin: auto;
-    transition: 0.5s; /*tiempo de transiciones de cuando les pongo el mouse por encima */
+    transition: 0.5s; 
 }
 .nav-links ul li:hover::after{
     width: 100%;

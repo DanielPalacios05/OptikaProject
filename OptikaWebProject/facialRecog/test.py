@@ -8,9 +8,7 @@ a = detect(frame)
 print(a[1])
 
 a = Image.fromarray(cv2.cvtColor(a[0],cv2.COLOR_BGR2RGB))
-
 a.save("forrealforreal.jpg")
-
 
 
 print(a)

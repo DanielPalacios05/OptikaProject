@@ -1,9 +1,7 @@
 from django import forms
 from django.forms import formset_factory
 
-
 class PersonForm(forms.Form):
-
     name = forms.CharField(label="Nombre:",widget=forms.TextInput(attrs={"class":"form_control"}))
 
 class FileForm(forms.Form):
@@ -14,10 +12,4 @@ class FileForm(forms.Form):
     )
     )
 
-
 FileFormset = formset_factory(FileForm,extra=1)
-
-    
-
-
-
