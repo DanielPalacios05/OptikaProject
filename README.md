@@ -1,6 +1,5 @@
-<h3 align="left">ㅤ</h3> <!-- aquí hay un icono invisible para el espacio -->
-<h3 align="left">ㅤ</h3> <!-- aquí hay un icono invisible para el espacio -->
-
+<br> 
+<br> 
 <p align="center"> 
     <img width="400" src="https://i.imgur.com/BWYIfMp.png">
 </p>
@@ -15,8 +14,7 @@ IoT (Internet Of Things) to make users feel confident and aware of who is outsid
 Optika has a web application that allows users to keep track of people detected in front of a configurable device that can be attached to a house door or wall, receive notifications whenever someone known or unknown for the system went through the device and watch the device camera live stream for remote surveillance.
 </h3>
 
-
-<h3 align="left">ㅤ</h3> <!-- aquí hay un icono invisible para el espacio -->
+<br> 
 
 <h2 align="left">Main functionalities:</h2>
 
